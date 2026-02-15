@@ -1,0 +1,47 @@
+import pandas as pd
+
+
+class RecommendationEngine:
+
+    def __init__(self, scored_df):
+
+        self.df = scored_df
+
+    def get_top3(self):
+
+        # Sort by semantic coverage
+        ranked = self.df.sort_values(
+            by="CoverageScore",
+            ascending=False
+        )
+
+        # Keep Top 3
+        top3 = ranked.head(3)
+
+        # Format AISCA Output
+        recommendations = []
+
+        for _, row in top3.iterrows():
+
+            rec = {
+                "Title": row["Title"],
+                "CoverageScore": round(
+                    row["CoverageScore"], 3
+                ),
+                "MoodScore": round(
+                    row["MoodScore"], 3
+                ),
+                "ThemeScore": round(
+                    row["ThemeScore"], 3
+                ),
+                "StyleScore": round(
+                    row["StyleScore"], 3
+                ),
+                "DescScore": round(
+                    row["DescScore"], 3
+                )
+            }
+
+            recommendations.append(rec)
+
+        return recommendations
