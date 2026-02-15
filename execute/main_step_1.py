@@ -137,3 +137,63 @@ explanation = llm.generate(prompt)
 print("\nGENAI EXPLANATION:\n")
 print(explanation)
 
+import streamlit as st
+from src.user_profile.profile_encoder import UserProfileEncoder
+from src.user_profile.questionnaire_schema import UserQuestionnaire
+from src.scoring.coverage_scorer import CoverageScorer
+from src.recommendation.recommender import RecommendationEngine
+from src.visualization.radar_plot import plot_radar_chart
+
+st.title("AISCA Movie Recommendation Dashboard")
+
+# -------------------------
+# User Input Form
+# -------------------------
+description = st.text_area("Describe the movie you want:")
+preferred_mood = st.selectbox("Preferred Mood", ["dark", "uplifting", "tense", "heroic"])
+preferred_genre = st.selectbox("Preferred Genre", ["crime", "fantasy", "family", "action", "thriller"])
+preferred_style = st.selectbox("Preferred Style", ["slow", "fast", "dramatic", "mystery"])
+mood_intensity = st.slider("Mood Intensity (1-5)", 1, 5, 3)
+theme_interest = st.slider("Theme Interest (1-5)", 1, 5, 3)
+style_interest = st.slider("Style Interest (1-5)", 1, 5, 3)
+
+if st.button("Get Recommendations"):
+
+    # -------------------------
+    # Encode Profile
+    # -------------------------
+    user_input = UserQuestionnaire(
+        description=description,
+        preferred_mood=preferred_mood,
+        preferred_genre=preferred_genre,
+        preferred_style=preferred_style,
+        mood_intensity=mood_intensity,
+        theme_interest=theme_interest,
+        style_interest=style_interest
+    )
+
+    encoder = UserProfileEncoder()
+    user_profile = encoder.encode_profile(user_input)
+
+    # -------------------------
+    # Coverage Scoring
+    # -------------------------
+    scorer = CoverageScorer()
+    scored_movies = scorer.compute_score(user_profile)
+
+    # -------------------------
+    # Top 3 Recommendation
+    # -------------------------
+    engine = RecommendationEngine(scored_movies)
+    top3 = engine.get_top3()
+
+    st.subheader("Top 3 Recommendations:")
+    for movie in top3:
+        st.markdown(f"**{movie['Title']}** — Coverage Score: {movie['CoverageScore']:.2f}")
+
+    # -------------------------
+    # Radar Charts
+    # -------------------------
+    st.subheader("Semantic Block Radar Charts")
+    for movie in top3:
+        plot_radar_chart([movie])
