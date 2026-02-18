@@ -24,6 +24,7 @@ class RecommendationEngine:
         for _, row in top3.iterrows():
 
             rec = {
+                "FilmID": int(row["FilmID"]),
                 "Title": row["Title"],
                 "CoverageScore": round(
                     row["CoverageScore"], 3

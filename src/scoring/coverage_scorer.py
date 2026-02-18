@@ -2,21 +2,20 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 
+from src.core.config import EMBEDDINGS_DIR, PROCESSED_DIR
+
 
 class CoverageScorer:
 
     def __init__(self):
-
         # Load movie embeddings from Step 2
-        self.mood_emb = np.load("models/embeddings/mood_embeddings.npy")
-        self.theme_emb = np.load("models/embeddings/theme_embeddings.npy")
-        self.style_emb = np.load("models/embeddings/style_embeddings.npy")
-        self.desc_emb = np.load("models/embeddings/desc_embeddings.npy")
+        self.mood_emb = np.load(EMBEDDINGS_DIR / "mood_embeddings.npy")
+        self.theme_emb = np.load(EMBEDDINGS_DIR / "theme_embeddings.npy")
+        self.style_emb = np.load(EMBEDDINGS_DIR / "style_embeddings.npy")
+        self.desc_emb = np.load(EMBEDDINGS_DIR / "desc_embeddings.npy")
 
         # Load referential
-        self.df = pd.read_csv(
-            "data/processed/movies_referential.csv"
-        )
+        self.df = pd.read_csv(PROCESSED_DIR / "movies_referential.csv")
 
     def compute_score(self, user_profile):
 

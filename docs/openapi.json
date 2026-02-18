@@ -1,0 +1,1009 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AISCA Semantic Movie Recommender API",
+    "description": "Semantic movie recommendation API powered by AISCA: user preferences are encoded and matched against a movie referential. Top 3 recommendations are returned with an AI-generated explanation.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/v1/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Health check",
+        "description": "Returns API status and version. Use for load balancers and monitoring.",
+        "operationId": "health_api_v1_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Login",
+        "description": "Authenticate with username and password. Returns access and refresh tokens.",
+        "operationId": "login_api_v1_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenPair"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Refresh tokens",
+        "description": "Exchange a valid refresh token for a new access and refresh token pair.",
+        "operationId": "refresh_api_v1_auth_refresh_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenPair"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Current user",
+        "description": "Return the currently authenticated user (requires Bearer token).",
+        "operationId": "me_api_v1_auth_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOut"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/recommendations": {
+      "post": {
+        "tags": [
+          "Recommendations"
+        ],
+        "summary": "Get movie recommendations",
+        "description": "Submit your preferences (questionnaire). Returns top 3 movies with semantic coverage scores and an AI-generated explanation. Requires authentication.",
+        "operationId": "get_recommendations_api_v1_recommendations_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecommendationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_RecommendationResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/movies": {
+      "get": {
+        "tags": [
+          "Movies"
+        ],
+        "summary": "List movies",
+        "description": "Paginated list with optional search and filters. Use for browse UI with posters.",
+        "operationId": "list_movies_api_v1_movies_get",
+        "parameters": [
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Offset",
+              "default": 0,
+              "title": "Skip"
+            },
+            "description": "Offset"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "description": "Page size",
+              "default": 20,
+              "title": "Limit"
+            },
+            "description": "Page size"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Search in title and description",
+              "title": "Search"
+            },
+            "description": "Search in title and description"
+          },
+          {
+            "name": "mood",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by mood",
+              "title": "Mood"
+            },
+            "description": "Filter by mood"
+          },
+          {
+            "name": "genre",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by genre / emotional tone",
+              "title": "Genre"
+            },
+            "description": "Filter by genre / emotional tone"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_MovieListResponse_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/movies/{film_id}": {
+      "get": {
+        "tags": [
+          "Movies"
+        ],
+        "summary": "Get movie by ID",
+        "description": "Full movie details including poster URL for detail page or modal.",
+        "operationId": "get_movie_api_v1_movies__film_id__get",
+        "parameters": [
+          {
+            "name": "film_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Film Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_MovieDetail_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/catalog/options": {
+      "get": {
+        "tags": [
+          "Catalog"
+        ],
+        "summary": "Get filter options",
+        "description": "Returns unique moods, genres, and styles for UI dropdowns and filters.",
+        "operationId": "get_catalog_options_api_v1_catalog_options_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse_CatalogOptions_"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "tags": [
+          "Root"
+        ],
+        "summary": "Root",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApiResponse_CatalogOptions_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/CatalogOptions"
+          },
+          "meta": {
+            "type": "object",
+            "title": "Meta",
+            "description": "Optional metadata (e.g. request_id, timestamp)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "title": "ApiResponse[CatalogOptions]"
+      },
+      "ApiResponse_MovieDetail_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/MovieDetail"
+          },
+          "meta": {
+            "type": "object",
+            "title": "Meta",
+            "description": "Optional metadata (e.g. request_id, timestamp)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "title": "ApiResponse[MovieDetail]"
+      },
+      "ApiResponse_MovieListResponse_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/MovieListResponse"
+          },
+          "meta": {
+            "type": "object",
+            "title": "Meta",
+            "description": "Optional metadata (e.g. request_id, timestamp)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "title": "ApiResponse[MovieListResponse]"
+      },
+      "ApiResponse_RecommendationResponse_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/RecommendationResponse"
+          },
+          "meta": {
+            "type": "object",
+            "title": "Meta",
+            "description": "Optional metadata (e.g. request_id, timestamp)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "title": "ApiResponse[RecommendationResponse]"
+      },
+      "CatalogOptions": {
+        "properties": {
+          "moods": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Moods",
+            "description": "Available mood options"
+          },
+          "genres": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Genres",
+            "description": "Available theme/genre options"
+          },
+          "styles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Styles",
+            "description": "Available narrative style options"
+          }
+        },
+        "type": "object",
+        "required": [
+          "moods",
+          "genres",
+          "styles"
+        ],
+        "title": "CatalogOptions",
+        "description": "Options for UI dropdowns (moods, genres, styles)."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Service status"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "description": "API version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "version"
+        ],
+        "title": "HealthResponse",
+        "description": "Health check response."
+      },
+      "LoginRequest": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Username",
+            "description": "Username"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Password",
+            "description": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "LoginRequest",
+        "description": "Credentials for login."
+      },
+      "MovieDetail": {
+        "properties": {
+          "film_id": {
+            "type": "integer",
+            "title": "Film Id",
+            "description": "Unique movie ID"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Movie title"
+          },
+          "mood": {
+            "type": "string",
+            "title": "Mood",
+            "description": "Mood tag(s)"
+          },
+          "theme": {
+            "type": "string",
+            "title": "Theme",
+            "description": "Theme tag(s)"
+          },
+          "narrative_style": {
+            "type": "string",
+            "title": "Narrative Style",
+            "description": "Narrative style tag(s)"
+          },
+          "emotional_tone": {
+            "type": "string",
+            "title": "Emotional Tone",
+            "description": "Genre / emotional tone"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Full semantic description"
+          },
+          "overview": {
+            "type": "string",
+            "title": "Overview",
+            "description": "Short plot overview"
+          },
+          "poster_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Poster Url",
+            "description": "TMDB poster image URL"
+          },
+          "release_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Release Date",
+            "description": "Release date"
+          },
+          "vote_average": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vote Average",
+            "description": "Average rating if available"
+          }
+        },
+        "type": "object",
+        "required": [
+          "film_id",
+          "title",
+          "mood",
+          "theme",
+          "narrative_style",
+          "emotional_tone",
+          "description",
+          "overview"
+        ],
+        "title": "MovieDetail",
+        "description": "Full movie details for detail page or modal."
+      },
+      "MovieListItem": {
+        "properties": {
+          "film_id": {
+            "type": "integer",
+            "title": "Film Id",
+            "description": "Unique movie ID"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Movie title"
+          },
+          "mood": {
+            "type": "string",
+            "title": "Mood",
+            "description": "Mood tag(s)"
+          },
+          "theme": {
+            "type": "string",
+            "title": "Theme",
+            "description": "Theme tag(s)"
+          },
+          "narrative_style": {
+            "type": "string",
+            "title": "Narrative Style",
+            "description": "Narrative style tag(s)"
+          },
+          "emotional_tone": {
+            "type": "string",
+            "title": "Emotional Tone",
+            "description": "Genre / emotional tone"
+          },
+          "poster_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Poster Url",
+            "description": "TMDB poster image URL"
+          },
+          "vote_average": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vote Average",
+            "description": "Average rating if available"
+          }
+        },
+        "type": "object",
+        "required": [
+          "film_id",
+          "title",
+          "mood",
+          "theme",
+          "narrative_style",
+          "emotional_tone"
+        ],
+        "title": "MovieListItem",
+        "description": "Movie in list/browse responses."
+      },
+      "MovieListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/MovieListItem"
+            },
+            "type": "array",
+            "title": "Items",
+            "description": "Page of movies"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "description": "Total count for current filters"
+          },
+          "skip": {
+            "type": "integer",
+            "title": "Skip",
+            "description": "Offset applied"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "description": "Page size"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "skip",
+          "limit"
+        ],
+        "title": "MovieListResponse",
+        "description": "Paginated movie list."
+      },
+      "MovieRecommendationItem": {
+        "properties": {
+          "film_id": {
+            "type": "integer",
+            "title": "Film Id",
+            "description": "Movie ID for linking to detail"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "Movie title"
+          },
+          "poster_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Poster Url",
+            "description": "Poster image URL for UI"
+          },
+          "coverage_score": {
+            "type": "number",
+            "title": "Coverage Score",
+            "description": "Overall semantic coverage score"
+          },
+          "mood_score": {
+            "type": "number",
+            "title": "Mood Score",
+            "description": "Mood match score"
+          },
+          "theme_score": {
+            "type": "number",
+            "title": "Theme Score",
+            "description": "Theme match score"
+          },
+          "style_score": {
+            "type": "number",
+            "title": "Style Score",
+            "description": "Style match score"
+          },
+          "desc_score": {
+            "type": "number",
+            "title": "Desc Score",
+            "description": "Description match score"
+          }
+        },
+        "type": "object",
+        "required": [
+          "film_id",
+          "title",
+          "coverage_score",
+          "mood_score",
+          "theme_score",
+          "style_score",
+          "desc_score"
+        ],
+        "title": "MovieRecommendationItem",
+        "description": "Single movie in the recommendation list (with optional poster for UI)."
+      },
+      "RecommendationRequest": {
+        "properties": {
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Free-text description of what the user wants"
+          },
+          "preferred_mood": {
+            "type": "string",
+            "title": "Preferred Mood",
+            "description": "Preferred mood (e.g. dark, uplifting)"
+          },
+          "preferred_genre": {
+            "type": "string",
+            "title": "Preferred Genre",
+            "description": "Preferred genre/theme (e.g. crime, fantasy)"
+          },
+          "preferred_style": {
+            "type": "string",
+            "title": "Preferred Style",
+            "description": "Preferred narrative style (e.g. slow, action)"
+          },
+          "mood_intensity": {
+            "type": "integer",
+            "maximum": 5.0,
+            "minimum": 1.0,
+            "title": "Mood Intensity",
+            "description": "Mood intensity 1-5"
+          },
+          "theme_interest": {
+            "type": "integer",
+            "maximum": 5.0,
+            "minimum": 1.0,
+            "title": "Theme Interest",
+            "description": "Theme interest 1-5"
+          },
+          "style_interest": {
+            "type": "integer",
+            "maximum": 5.0,
+            "minimum": 1.0,
+            "title": "Style Interest",
+            "description": "Style interest 1-5"
+          }
+        },
+        "type": "object",
+        "required": [
+          "description",
+          "preferred_mood",
+          "preferred_genre",
+          "preferred_style",
+          "mood_intensity",
+          "theme_interest",
+          "style_interest"
+        ],
+        "title": "RecommendationRequest",
+        "description": "User preferences for movie recommendations (questionnaire)."
+      },
+      "RecommendationResponse": {
+        "properties": {
+          "recommendations": {
+            "items": {
+              "$ref": "#/components/schemas/MovieRecommendationItem"
+            },
+            "type": "array",
+            "title": "Recommendations",
+            "description": "Top 3 recommended movies"
+          },
+          "explanation": {
+            "type": "string",
+            "title": "Explanation",
+            "description": "AI-generated explanation of why these movies match"
+          }
+        },
+        "type": "object",
+        "required": [
+          "recommendations",
+          "explanation"
+        ],
+        "title": "RecommendationResponse",
+        "description": "Payload returned by the recommendations endpoint (wrapped in ApiResponse.data)."
+      },
+      "RefreshRequest": {
+        "properties": {
+          "refresh_token": {
+            "type": "string",
+            "title": "Refresh Token",
+            "description": "JWT refresh token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "refresh_token"
+        ],
+        "title": "RefreshRequest",
+        "description": "Refresh token body."
+      },
+      "TokenPair": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token",
+            "description": "JWT access token"
+          },
+          "refresh_token": {
+            "type": "string",
+            "title": "Refresh Token",
+            "description": "JWT refresh token"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type",
+            "description": "Token type",
+            "default": "bearer"
+          },
+          "user": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserOut"
+              }
+            ],
+            "description": "Authenticated user"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "refresh_token",
+          "user"
+        ],
+        "title": "TokenPair",
+        "description": "Access and refresh tokens with user info."
+      },
+      "UserOut": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "User identifier"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username",
+            "description": "Username"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "username"
+        ],
+        "title": "UserOut",
+        "description": "Public user info returned in auth responses."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Access token from POST /api/v1/auth/login"
+      }
+    }
+  }
+}
