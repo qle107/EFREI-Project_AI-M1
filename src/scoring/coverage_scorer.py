@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
+from datetime import date
 from sklearn.metrics.pairwise import cosine_similarity
-
 from src.core.config import EMBEDDINGS_DIR, PROCESSED_DIR
 
 
@@ -17,6 +17,23 @@ class CoverageScorer:
         # Load referential
         self.df = pd.read_csv(PROCESSED_DIR / "movies_referential.csv")
 
+        self.current_year = date.today().year
+
+    # Normalize similarity function
+    def normalize(self, sim):
+        return (sim - sim.min()) / (sim.max() - sim.min() + 1e-8)
+
+    # Compute Recency Score
+    def compute_recency_score(self):
+        year = self.df["release_year"].fillna(2000)
+
+        recency_score = np.exp(
+            -(self.current_year - year) / 10
+        )
+
+        return recency_score
+
+    # MAIN SCORING FUNCTION
     def compute_score(self, user_profile):
 
         # Compare USER vs MOVIES
@@ -41,19 +58,32 @@ class CoverageScorer:
             self.desc_emb
         )[0]
 
+        mood_sim = self.normalize(mood_sim)
+        theme_sim = self.normalize(theme_sim)
+        style_sim = self.normalize(style_sim)
+        desc_sim = self.normalize(desc_sim)
+
+        recency_score = self.compute_recency_score()
+
+        year = self.df["release_year"].fillna(2000)
+        recent_boost = (year >= 2018).astype(int) * 0.1
+
         # Debug: Print similarity scores
         self.df["MoodScore"] = mood_sim
         self.df["ThemeScore"] = theme_sim
         self.df["StyleScore"] = style_sim
         self.df["DescScore"] = desc_sim
+        self.df["RecencyScore"] = recency_score
 
 
         # AISCA Weighted Score
         final_score = (
-            0.35 * mood_sim +
-            0.25 * theme_sim +
-            0.20 * style_sim +
-            0.20 * desc_sim
+                0.30 * mood_sim +
+                0.20 * theme_sim +
+                0.15 * style_sim +
+                0.15 * desc_sim +
+                0.20 * recency_score +
+                recent_boost
         )
 
         self.df["CoverageScore"] = final_score

@@ -11,16 +11,18 @@ from src.scoring.coverage_scorer import CoverageScorer
 
 # ---
 
-#
-# create_referential(
-#     input_path="data/raw/Database_Cleaned.csv",
-#     output_path="data/processed/movies_referential.csv"
-# )
+
+create_referential(
+    input_path="data/raw/Database_Cleaned.csv",
+    output_path="data/processed/movies_referential.csv"
+)
+print("Referential creation complete ✔")
 # ---
 
-# build_block_embeddings(
-#     referential_path="data/processed/movies_referential.csv"
-# )
+
+build_block_embeddings(
+    referential_path="data/processed/movies_referential.csv"
+)
 # ---
 # user_input = UserQuestionnaire(
 #     description="I want a dark emotional story with mystery",
@@ -95,25 +97,25 @@ from src.scoring.coverage_scorer import CoverageScorer
 # for rec in top3:
 #     print(rec)
 
-from src.user_profile.profile_encoder import UserProfileEncoder
-from src.user_profile.questionnaire_schema import UserQuestionnaire
-from src.scoring.coverage_scorer import CoverageScorer
-from src.recommendation.recommender import RecommendationEngine
-from src.genAi.prompt_builder import build_aisca_prompt
-from src.genAi.llm_client import LLMClient
-
-# Run ollama run phi3 in cmd to start local LLM server
-
-# User Input
-user_input = UserQuestionnaire(
-    description="I want a dark emotional story with mystery",
-    preferred_mood="dark",
-    preferred_genre="crime",
-    preferred_style="slow",
-    mood_intensity=5,
-    theme_interest=4,
-    style_interest=3
-)
+# from src.user_profile.profile_encoder import UserProfileEncoder
+# from src.user_profile.questionnaire_schema import UserQuestionnaire
+# from src.scoring.coverage_scorer import CoverageScorer
+# from src.recommendation.recommender import RecommendationEngine
+# from src.genAi.prompt_builder import build_aisca_prompt
+# from src.genAi.llm_client import LLMClient
+#
+# # Run ollama run phi3 in cmd to start local LLM server
+#
+# # User Input
+# user_input = UserQuestionnaire(
+#     description="I want a dark emotional story with mystery",
+#     preferred_mood="dark",
+#     preferred_genre="crime",
+#     preferred_style="slow",
+#     mood_intensity=5,
+#     theme_interest=4,
+#     style_interest=3
+# )
 
 # Profile Encoding
 encoder = UserProfileEncoder()

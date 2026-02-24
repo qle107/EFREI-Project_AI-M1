@@ -34,6 +34,10 @@ def extract_block(text, taxonomy):
 def build_semantic_blocks(df):
 
     # Ensure no NaN before semantic processing
+    df["release_year"] = df["release_date"].apply(
+        lambda x: pd.to_datetime(x, errors="coerce").year
+    ).fillna(2000).astype(int)
+
     df["Overview"] = df["Overview"].fillna("")
     df["Genre"] = df["Genre"].fillna("")
 

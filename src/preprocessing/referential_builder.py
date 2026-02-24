@@ -14,6 +14,7 @@ def create_referential(
     df["FilmID"] = df.index
 
     df = df[[
+        "release_year",
         "FilmID",
         "Title",
         "Mood",
