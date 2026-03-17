@@ -108,21 +108,12 @@ Answer in a professional but accessible tone.
 """
 
     # ---------------------------
-    # LLM Call (Ollama)
+    # LLM Call (via cached LLMClient)
     # ---------------------------
     def call_llm(self, prompt: str) -> str:
-        payload = {
-            "model": self.llm_model,
-            "prompt": prompt,
-            "stream": False,
-        }
-
-        response = requests.post(self.llm_url, json=payload)
-
-        if response.status_code != 200:
-            raise RuntimeError(f"LLM request failed: {response.text}")
-
-        return response.json()["response"]
+        from src.genAi.llm_client import LLMClient
+        client = LLMClient(url=self.llm_url, model=self.llm_model)
+        return client.generate(prompt)
 
     # ---------------------------
     # Full RAG Pipeline

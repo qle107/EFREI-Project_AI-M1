@@ -1,10 +1,13 @@
+import streamlit as st
 from src.preprocessing.referential_builder import create_referential
 from src.embedding.embedding_builder import build_block_embeddings
 from src.user_profile.profile_encoder import UserProfileEncoder
 from src.user_profile.questionnaire_schema import UserQuestionnaire
-from src.user_profile.profile_encoder import UserProfileEncoder
-from src.user_profile.questionnaire_schema import UserQuestionnaire
 from src.scoring.coverage_scorer import CoverageScorer
+from src.recommendation.recommender import RecommendationEngine
+from src.genAi.prompt_builder import build_aisca_prompt
+from src.genAi.llm_client import LLMClient
+from src.visualization.radar_plot import plot_radar_chart
 
 
 
@@ -97,16 +100,9 @@ print("\nTOP 3 RECOMMENDATIONS:\n")
 for rec in top3:
     print(rec)
 
-from src.user_profile.profile_encoder import UserProfileEncoder
-from src.user_profile.questionnaire_schema import UserQuestionnaire
-from src.scoring.coverage_scorer import CoverageScorer
-from src.recommendation.recommender import RecommendationEngine
-from src.genAi.prompt_builder import build_aisca_prompt
-from src.genAi.llm_client import LLMClient
-#
-# # Run ollama run phi3 in cmd to start local LLM server
+# Run ollama run phi3 in cmd to start local LLM server
 # ollama run phi3:mini
-# # User Input
+# User Input
 user_input = UserQuestionnaire(
     description="I want a dark emotional story with mystery",
     preferred_mood="dark",
@@ -138,13 +134,6 @@ explanation = llm.generate(prompt)
 
 print("\nGENAI EXPLANATION:\n")
 print(explanation)
-
-import streamlit as st
-from src.user_profile.profile_encoder import UserProfileEncoder
-from src.user_profile.questionnaire_schema import UserQuestionnaire
-from src.scoring.coverage_scorer import CoverageScorer
-from src.recommendation.recommender import RecommendationEngine
-from src.visualization.radar_plot import plot_radar_chart
 
 st.title("AISCA Movie Recommendation Dashboard")
 

@@ -65,25 +65,19 @@ class CoverageScorer:
 
         recency_score = self.compute_recency_score()
 
-        year = self.df["release_year"].fillna(2000)
-        recent_boost = (year >= 2018).astype(int) * 0.1
-
-        # Debug: Print similarity scores
         self.df["MoodScore"] = mood_sim
         self.df["ThemeScore"] = theme_sim
         self.df["StyleScore"] = style_sim
         self.df["DescScore"] = desc_sim
         self.df["RecencyScore"] = recency_score
 
-
-        # AISCA Weighted Score
+        # AISCA Weighted Score: semantic blocks dominate (95%), recency is a light tiebreaker (5%)
         final_score = (
-                0.30 * mood_sim +
-                0.20 * theme_sim +
-                0.15 * style_sim +
+                0.35 * mood_sim +
+                0.25 * theme_sim +
+                0.20 * style_sim +
                 0.15 * desc_sim +
-                0.20 * recency_score +
-                recent_boost
+                0.05 * recency_score
         )
 
         self.df["CoverageScore"] = final_score

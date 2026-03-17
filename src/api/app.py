@@ -1,12 +1,24 @@
 """
 FastAPI application factory and OpenAPI configuration.
 """
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 
 from src.core.config import API_TITLE, API_VERSION, API_V1_PREFIX
-from src.api.routers import auth, health, recommendations, movies, catalog
+from src.api.routers import auth, health, recommendations, movies, catalog, settings
+
+# Ensure backend loggers show INFO so LLM switch and recommendation debug logs are visible
+_src_log = logging.getLogger("src")
+_src_log.setLevel(logging.INFO)
+if not _src_log.handlers:
+    _h = logging.StreamHandler()
+    _h.setLevel(logging.INFO)
+    _h.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"))
+    _src_log.addHandler(_h)
+    _src_log.propagate = False  # avoid duplicate lines when root also has a handler
 
 
 def create_app() -> FastAPI:
@@ -37,6 +49,7 @@ def create_app() -> FastAPI:
     app.include_router(recommendations.router, prefix=API_V1_PREFIX)
     app.include_router(movies.router, prefix=API_V1_PREFIX)
     app.include_router(catalog.router, prefix=API_V1_PREFIX)
+    app.include_router(settings.router, prefix=API_V1_PREFIX)
 
     # Root redirect or minimal response for /
     @app.get("/", tags=["Root"])
@@ -74,11 +87,11 @@ def custom_openapi():
             "description": "Access token from POST /api/v1/auth/login",
         }
     }
-    # Mark protected routes (recommendations) as requiring auth
+    # Mark protected routes (recommendations, settings) as requiring auth
     for path, methods in openapi_schema.get("paths", {}).items():
         for method, spec in methods.items():
             if method in ("get", "post", "put", "delete", "patch") and isinstance(spec, dict):
-                if "recommendations" in path:
+                if "recommendations" in path or "settings" in path:
                     spec["security"] = [{"BearerAuth": []}]
     app.openapi_schema = openapi_schema
     return app.openapi_schema

@@ -56,6 +56,9 @@ Default credentials: `admin` / `admin`. Override via env: `DEMO_USERNAME`, `DEMO
 | GET | `/api/v1/movies` | No | Paginated movie list with optional `search`, `mood`, `genre`; includes `poster_url`, `vote_average` |
 | GET | `/api/v1/movies/{film_id}` | No | Single movie detail (poster, overview, release_date, etc.) for modals/detail page |
 | GET | `/api/v1/catalog/options` | No | Options for dropdowns: `moods`, `genres`, `styles` |
+| GET | `/api/v1/settings/llm` | Bearer | Current LLM settings (provider: Ollama / Claude / Gemini, model, cache, etc.) |
+| PUT | `/api/v1/settings/llm` | Bearer | Update LLM provider or options (switch between Ollama, Claude, Gemini) |
+| POST | `/api/v1/settings/llm/clear-cache` | Bearer | Clear in-memory LLM response cache |
 
 ### Recommendation request body
 
@@ -121,4 +124,4 @@ Create a `.env` or set in the shell:
 
 - `SECRET_KEY` ? JWT signing key (required in production).
 - `DEMO_USERNAME` / `DEMO_PASSWORD_HASH` ? override default user (hash with bcrypt).
-- `LLM_URL` / `LLM_MODEL` ? Ollama endpoint and model (default: `http://localhost:11434/api/generate`, `phi3:mini`).
+- **LLM**: `LLM_PROVIDER` = `ollama` (default), `anthropic`, or `gemini`. For Ollama: `LLM_URL` / `LLM_MODEL` (default: `http://localhost:11434/api/generate`, `phi3:mini`). For Claude: `ANTHROPIC_API_KEY`. For Gemini: `GEMINI_API_KEY`. You can switch between the three in the app (Settings or Recommend page).

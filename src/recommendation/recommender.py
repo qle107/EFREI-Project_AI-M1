@@ -12,7 +12,7 @@ class RecommendationEngine:
         # Sort by semantic coverage
         ranked = self.df.sort_values(
             by="CoverageScore",
-            ascending=False
+            ascending=True
         )
 
         # Keep Top 3

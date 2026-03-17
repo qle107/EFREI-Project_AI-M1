@@ -1,4 +1,4 @@
-# AISCA Movies — Frontend
+# CineMatch — Frontend
 
 Modern movie recommendation UI built with Next.js, Tailwind CSS, and Framer Motion.
 

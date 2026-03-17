@@ -2,6 +2,7 @@
 FastAPI dependencies: auth, service singletons.
 Heavy components (encoder, scorer, LLM) are lazy-loaded on first use.
 """
+import logging
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
@@ -10,6 +11,8 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from src.core.security import decode_token
 from src.api.schemas.auth import UserOut
 from src.api.schemas.recommendations import MovieRecommendationItem
+
+logger = logging.getLogger(__name__)
 
 # HTTPBearer for protected routes
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -40,8 +43,27 @@ def get_llm_client():
     global _llm_client
     if _llm_client is None:
         from src.genAi.llm_client import LLMClient
-        _llm_client = LLMClient()
+        from src.core.llm_runtime_config import get_llm_runtime_for_client, get_llm_runtime
+        runtime = get_llm_runtime()
+        _llm_client = LLMClient(config_overrides=get_llm_runtime_for_client())
+        logger.info(
+            "LLM client created: provider=%s, ollama url=%s, ollama model=%s, anthropic_model=%s, gemini_model=%s, cache_max_size=%s",
+            runtime.get("provider"),
+            runtime.get("llm_url"),
+            runtime.get("llm_model"),
+            runtime.get("anthropic_model"),
+            runtime.get("gemini_model"),
+            runtime.get("cache_max_size"),
+        )
     return _llm_client
+
+
+def reset_llm_client() -> None:
+    """Drop the LLM client singleton so next get_llm_client() uses fresh runtime config."""
+    global _llm_client
+    if _llm_client is not None:
+        logger.info("LLM client singleton reset (settings changed); next use will create a new client with current runtime config.")
+    _llm_client = None
 
 
 def get_current_user(

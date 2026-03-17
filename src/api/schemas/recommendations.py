@@ -1,4 +1,5 @@
 """Recommendation request/response schemas."""
+from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -19,6 +20,8 @@ class RecommendationRequest(BaseModel):
                     "preferred_mood": "tense",
                     "preferred_genre": "science fiction",
                     "preferred_style": "mystery",
+                    "preferred_era": "2010s",
+                    "preferred_director": "Denis Villeneuve",
                     "mood_intensity": 5,
                     "theme_interest": 4,
                     "style_interest": 4,
@@ -56,6 +59,16 @@ class RecommendationRequest(BaseModel):
         ...,
         description="Narrative style or pacing. Use values from GET /api/v1/catalog/options (styles). Examples: action, mystery, drama. Avoid long phrases; one or two keywords work best.",
         examples=["mystery", "action", "drama"],
+    )
+    preferred_era: Optional[str] = Field(
+        None,
+        description="Preferred time period for movies. Examples: 'Classic (pre-1980)', '80s', '90s', '2000s', '2010s', 'Recent (2020+)'.",
+        examples=["2010s", "90s", "Recent (2020+)"],
+    )
+    preferred_director: Optional[str] = Field(
+        None,
+        description="Preferred director or filmmaking style reference. Free text, e.g. 'Christopher Nolan', 'Wes Anderson'.",
+        examples=["Christopher Nolan", "Denis Villeneuve"],
     )
     mood_intensity: int = Field(
         ...,
@@ -95,3 +108,40 @@ class RecommendationResponse(BaseModel):
 
     recommendations: list[MovieRecommendationItem] = Field(..., description="Top 3 recommended movies")
     explanation: str = Field(..., description="AI-generated explanation of why these movies match")
+    cinephile_profile: Optional[str] = Field(None, description="AI-generated short cinephile profile of the user")
+    description_enriched: bool = Field(False, description="True if the user description was too short and was enriched by GenAI")
+    cached: bool = Field(False, description="True if the GenAI explanation was served from cache")
+    preset_id: Optional[str] = Field(None, description="Preset query ID if this was a preset request")
+    llm_provider: Optional[str] = Field(None, description="LLM used for the explanation: ollama or anthropic")
+
+
+class PresetQueryItem(BaseModel):
+    """A predefined recommendation query users can select for instant results."""
+
+    id: str = Field(..., description="Unique preset identifier")
+    label: str = Field(..., description="Human-readable label for the UI")
+    description: str = Field(..., description="The free-text description used")
+    preferred_mood: str
+    preferred_genre: str
+    preferred_style: str
+    mood_intensity: int
+    theme_interest: int
+    style_interest: int
+
+
+class HistoryEntrySummary(BaseModel):
+    """One row in the recommendation history list."""
+
+    id: int = Field(..., description="History entry ID")
+    created_at: str = Field(..., description="ISO timestamp")
+    summary: str = Field(..., description="Short summary (description snippet or preset name)")
+
+
+class HistoryEntryDetail(BaseModel):
+    """Full history entry for viewing a past recommendation."""
+
+    id: int = Field(..., description="History entry ID")
+    user_id: str = Field(..., description="User who ran the recommendation")
+    created_at: str = Field(..., description="ISO timestamp")
+    request: dict = Field(..., description="Request payload (description, mood, genre, etc.)")
+    response: dict = Field(..., description="Full response (recommendations, explanation, etc.)")

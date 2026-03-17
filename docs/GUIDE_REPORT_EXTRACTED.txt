@@ -1,0 +1,185 @@
+Guide de Rapport – Projet IA Générative (Format recommandé et Attentes) 
+ 
+Structure recommandée  
+ 
+1. Page de garde 
+A Inclure : Logo de l’Efrei, titre du projet, noms binôme + promotion / Mastère Data Engineering et IA 
++ Année universitaire, nom du tuteur / tutrice, Date du rapport, mention obligatoire : Projet certifiant 
+RNCP40875 Expert en Ingénieurie de Données – Bloc 2 : Pilotage et implémentation de solutions IA 
+2. Résumé Exécutif (1 page) 
+Court résumé incluant : but du projet,principaux choix techniques, résultats obtenus, outil 
+développé, technologies majeures (SBERT, Similarité, RAG, API GenAI, Streamlit, etc.). Ce résumé 
+doit permettre de comprendre le projet sans lire le rapport en entier. 
+3. Introduction et Contexte 
+Expliquer la problématique adressée (orientation métier, films, vins, parfums, etc.), le contexte 
+industriel, le cadre théorique, pourquoi utiliser : Analyse sémantique, Embeddings SBERT, RAG, IA 
+Générative (indiquer que l’usage est limité pour éviter d’utiliser des ressources payantes ; objectifs 
+pédagogiques). 
+4. Analyse du besoin utilisateur 
+Vous devez démontrer que vous connaissez votre utilisateur : type d’utilisateur visé, objectifs 
+utilisateurs, scénarios d’usage, hypothèses et contraintes… 
+5. Méthodologie de travail et gestion de projet 
+Décrire la méthodologie adoptée (Agile / Kanban / Hybrid), le découpage en tâches, le planning 
+(Gantt ou autre), l’organisation du travail en binôme, les outils collaboratifs (GitHub, Trello, …), et la 
+gestion des risques. Illustrer avec une capture du tableau de suivi ou de visuel Gantt... 
+6. Référentiel de données 
+Décrire de manière structurée le référentiel produit, en explicitant : le corpus et sources de 
+données, le modèle conceptuel et le schéma de données définis, le format de restitution final (CSV , 
+JSON, ou intégration SQL), et les modèles de données ou approches de modélisation utilisés. 
+7. Pipeline IA et Architecture 
+schéma explicatif, lisible et obligatoire doit présenter la chaîne de traitement de bout en bout. Il 
+doit inclure au minimum : 
+1. la collecte ou le questionnaire utilisateur, 
+2. les opérations de pré-traitement, 
+3. la construction des embeddings SBERT, 
+4. le calcul de similarité cosinus, 
+
+5. les mécanismes d’agrégation et de scoring, 
+6. la génération des recommandations Top-N, 
+7. l’usage contrôlé d’un modèle GenAI via un pipeline RAG pour planification, synthèse et 
+justification. 
+Le schéma peut intégrer toute autre étape complémentaire reflétant votre implémentation réelle. 
+Donc, vous pouvez compléter ce pipeline avec d’autres composants selon les choix techniques 
+réalisés. 
+8. Implémentation Technique 
+Décrire en détail : 
+• Architecture globale de la solution : vue d’ensemble du pipeline (backend, frontend, 
+stockage, API), composants principaux et interactions. 
+• Technologies utilisées : langages, frameworks, librairies et argumentation des choix 
+(performance, simplicité, maintenabilité, compatibilité pédagogique…). 
+• Choix du modèle SBERT : à titre d’exemple : variante retenue (ex. all-MiniLM, multi-qa, 
+modèle français, etc.), raisons du choix, mode de chargement et d’utilisation. 
+• Calcul des similarités : à titre d’exemple : métrique utilisée (cosinus), gestion des matrices 
+de similarité, optimisation éventuelle (batching, filtrage, seuils)… 
+• Système de score et pondérations : à titre d’exemple : combinaison des similarités avec 
+d’autres critères (contraintes, filtres), pondérations choisies et justification. 
+• Logique métier du classement : règles de ranking (Top-N), priorisation des résultats 
+pertinents. 
+• API GenAI : mode d’appel (RAG ou autre), stratégie de limitation des appels (seuils, …). 
+• Interface utilisateur (Streamlit ou autre) : structure des pages, flux utilisateur, composants 
+interactifs (formulaire, affichage des recommandations, explications). 
+• Dépôt Git : organisation du projet (structure des dossiers, modules), gestion des imports, 
+fichiers de configuration (requirements.txt, .env le cas échéant), listing des librairies 
+principales et éventuel usage des branches. 
+• Gouvernance et responsabilisation : gouvernance prise en compte ou future souhaitable 
+tels que : qualité, maîtrise et traçabilité des données,  droits d’accès et nettoyage contrôlés, 
+validation humaine des réponses, choix responsable des modèles (coût, transparence, 
+fiabilité), respect RGPD si produit réel, audit de biais, journalisation des appels GenAI et 
+sécurisation des flux API, gestion de risques sur les aspects éthique, opérationnels, 
+sécurité, et conformité (tels que dépendance API externe, hallucinations si RAG mal 
+construit, limites de modèle non fine-tuné, etc.), monitoring de performance et dérive 
+conceptuelle, correction et mise à jour régulière, etc. 
+9. Interface utilisateur / Prototype 
+Captures d’écran : questionnaire, résultats, graphiques (radar, bar chart, etc.), recommandations 
+affichées… 
+
+10. Résultats et Tests (Démonstrations) 
+A titre d’exemple, présenter les démonstrations avec plusieurs profils utilisateurs, tableaux des 
+scores par bloc/catégorie, résultats du moteur de recommandations, exemples de bio ou plan de 
+progression générés, visualisations comparées (radar, heatmap), etc. 
+ 
+ 
+11. Limites et pistes d’amélioration 
+Analyse critique des limites du modèle SBERT utilisé, de la variabilité des similarités, du dataset à 
+taille limité, du coût potentiellement élevé si API non limitée, de l’améliorations possibles (fine-
+tuning, DB vectorielle, chatbot guidé, etc.)… 
+12. Conclusion 
+Synthèse sur ce que vous avez réussi à faire, ce que vous avez appris, quelles compétences du 
+métier cela illustre, etc. 
+13. Annexes (optionnel) 
+• Arborescence du projet 
+• Schémas UML  
+• Exemple de fichier JSON/CSV 
+• Prompts utilisés pour GenAI : un appel pour plan, un pour bio 
+• … 
+ 
+Consignes de rédaction 
+• 20–30 pages (hors annexes) 
+• Police simple (Times New Roman 12, Arial/Calibri 11), interligne 1,  
+• Style professionnel et structuré 
+• Illustrer avec captures d’écran, schémas, tableaux 
+ 
+ 
+ 
+  
+
+Consignes de Soutenance (Format recommandé et Attentes) 
+La soutenance doit être courte, professionnelle et structurée.  
+Durée totale : 9 à 10 minutes, intégrant la session de Q/R. 
+ 
+Conseil : Pendant la présentation, allez directement à l’essentiel et évitez d’entrer trop dans 
+les détails. 
+ 
+Contenu recommandé pour les diapos de soutenance 
+Les diapos doivent reprendre la structure du rapport, en version synthétique et centrée sur les 
+éléments essentiels. 
+Elles peuvent être réorganisées selon votre préférence, à condition de conserver un fil conducteur 
+clair, une cohérence logique et un contenu adapté au temps de présentation. 
+Présentation du projet et Contexte 
+• Problématique adressée 
+• Contexte métier et utilisateurs visés 
+• Objectif du projet 
+• Pitch en une phrase (ex : “ Un moteur de recommandation IA sémantique basé sur SBERT et 
+assisté par l’IA Générative via RAG pour …”) 
+Analyse du besoin utilisateur 
+• Personne cible 
+• Scénarios d’usage (1 ou 2 exemples) 
+• Contraintes et hypotheses 
+Méthodologie de travail et Organisation 
+• Approche de gestion de projet (Agile / Kanban / hybride) 
+• Planification : jalons, Gantt ou mini roadmap… 
+• Répartition des tâches et collaboration en binôme 
+• Outils utilisés (GitHub, Trello/Notion, Teams, etc.) 
+• Gestion des risques et imprévus 
+Architecture globale et Choix technologiques 
+• Vue d’ensemble de la solution (backend, frontend, API) 
+• Rôle de chaque composant 
+• Justification synthétique des choix techniques 
+
+Pipeline IA et Architecture 
+• Schéma visuel clair du parcours utilisateur de bout en bout (à adapter selon votre 
+réalisation technique) : Collecte ; pré-processing ; embeddings SBERT ; similarité cosinus ; 
+scoring : Top-N ; RAG limité  
+• Mini-focus sur les étapes critiques (préprocessing, embeddings, scoring) 
+• Éventuels modules additionnels selon votre implémentation 
+Référentiel de données 
+• Sources de données utilisées 
+• Modélisation de données 
+• Format retenu (CSV / JSON / SQL) 
+• Extraits illustratifs 
+Implémentation Technique (éléments clés) 
+• Modèle SBERT retenu + raison du choix 
+• Calcul des similarités (cosinus, filtrage, seuils éventuels) 
+• Système de scoring et pondérations 
+• Stratégie RAG et usage API GenAI contrôlé (limitations) 
+• Structure du dépôt Git et principales librairies (Pas de code sauf snippet court et lisible, si 
+besoin) 
+• Gouvernance 
+Démonstration Live 
+• Questionnaire / Input utilisateur 
+• Résultats Top-N 
+• Visualisation (radar / bar chart / tags) 
+• Justification rapide des scores 
+• Exemple de génération GenAI (bio, plan, synthèse) 
+• Attention:  
+o Préparer en amont votre démo et les entrées pour éviter de perdre du temps) 
+o Prévoir au moins 1 cas alternatif si le temps le permet 
+o Avoir screenshots en backup si API lente ou courte démo enregistrée 
+Résultats et Tests 
+• Comparaison de profils utilisateurs 
+• Scores ou regroupements significatifs 
+
+• Comportement observé du modèle 
+• Vérification du bon fonctionnement 
+Limites et pistes d’amélioration 
+• Limites du dataset ou SBERT 
+• Qualité variable des embeddings 
+• Latence et coût API potentiels 
+• Améliorations envisagées (fine-tuning, vector DB, chatbot) 
+Conclusion 
+• Ce que vous avez réalisé 
+• Ce que vous avez appris 
+• Valeur démontrée pour le Mastère. Cométences visées et acquises  en pipeline NLP + 
+GenAI + interface + management de projet, … 
+ 
+ 

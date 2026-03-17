@@ -7,6 +7,7 @@ __pycache__/
 *$py.class
 *.so
 .Python
+*.egg
 *.egg-info/
 .eggs/
 dist/
@@ -34,6 +35,9 @@ Thumbs.db
 frontend/node_modules/
 frontend/.next/
 frontend/out/
+
+# Data (SQLite history, processed outputs)
+data/
 
 # Logs
 *.log

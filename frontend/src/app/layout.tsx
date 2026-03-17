@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AISCA Movies — Personalized Recommendations",
+  title: "CineMatch — Personalized Movie Recommendations",
   description: "Discover movies that match your mood, theme, and style.",
 };
 
