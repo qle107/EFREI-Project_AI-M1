@@ -43,8 +43,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem(USER_KEY);
     setToken(null);
     setUser(null);
-    router.push("/login");
-  }, [router]);
+    // Full navigation avoids App Router client RSC fetch (often surfaces as "Failed to fetch"
+    // on logout when dev server / Turbopack is flaky).
+    window.location.assign("/login");
+  }, []);
 
   logoutRef.current = logout;
 

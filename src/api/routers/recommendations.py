@@ -13,6 +13,7 @@ from src.api.schemas.common import ApiResponse
 from src.api.schemas.recommendations import (
     RecommendationRequest,
     RecommendationResponse,
+    ScoreWeights,
     PresetQueryItem,
     HistoryEntrySummary,
     HistoryEntryDetail,
@@ -126,7 +127,8 @@ def _run_pipeline(
     )
     user_profile = encoder.encode_profile(questionnaire)
 
-    scored_movies = scorer.compute_score(user_profile)
+    scored_movies = scorer.compute_score(user_profile, questionnaire)
+    score_weights = scorer.compute_axis_weights(questionnaire)
 
     engine = RecommendationEngine(scored_movies)
     top3 = engine.get_top3()
@@ -161,6 +163,13 @@ def _run_pipeline(
         cached=was_cached,
         preset_id=preset_id,
         llm_provider=llm_provider,
+        score_weights=ScoreWeights(
+            mood=score_weights["mood"],
+            theme=score_weights["theme"],
+            style=score_weights["style"],
+            description=score_weights["description"],
+            recency=score_weights["recency"],
+        ),
     )
 
 

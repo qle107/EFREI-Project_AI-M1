@@ -61,6 +61,10 @@ export interface MovieRecommendationItem {
   theme_score: number;
   style_score: number;
   desc_score: number;
+  raw_mood_similarity?: number;
+  raw_theme_similarity?: number;
+  raw_style_similarity?: number;
+  raw_desc_similarity?: number;
 }
 
 export interface RecommendationResponse {
@@ -71,6 +75,13 @@ export interface RecommendationResponse {
   cached?: boolean;
   preset_id?: string;
   llm_provider?: "ollama" | "anthropic" | "gemini";
+  score_weights: {
+    mood: number;
+    theme: number;
+    style: number;
+    description: number;
+    recency: number;
+  };
 }
 
 export interface PresetQueryItem {

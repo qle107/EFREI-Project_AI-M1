@@ -45,8 +45,8 @@ const PIPELINE_STEPS = [
     n: "04",
     icon: "⚖️",
     title: "Weighted Coverage Score",
-    body: "Dimension scores are aggregated using fixed weights: Mood 35% · Theme 25% · Style 20% · Desc 15% · Recency 5%.",
-    tech: "Σ wᵢ · scoreᵢ · recency_bonus",
+    body: "Dimension scores are aggregated with dynamic weights: Mood/Theme/Style are driven by sliders, Description keeps a strong base, and Recency remains a 5% tiebreaker.",
+    tech: "dynamic Σ wᵢ · scoreᵢ + 0.05·recency",
     color: "#f59e0b",
   },
   {
@@ -93,14 +93,14 @@ function ScoreFormulaCard() {
           style={{ backgroundColor: "rgba(0,0,0,0.35)" }}
         >
           coverage_score =<br />
-          &nbsp;&nbsp;0.35 × <span className="text-purple-300">mood_sim</span> +<br />
-          &nbsp;&nbsp;0.25 × <span className="text-blue-300">theme_sim</span> +<br />
-          &nbsp;&nbsp;0.20 × <span className="text-emerald-300">style_sim</span> +<br />
-          &nbsp;&nbsp;0.15 × <span className="text-amber-300">desc_sim</span> +<br />
+          &nbsp;&nbsp;w_mood × <span className="text-purple-300">mood_sim</span> +<br />
+          &nbsp;&nbsp;w_theme × <span className="text-blue-300">theme_sim</span> +<br />
+          &nbsp;&nbsp;w_style × <span className="text-emerald-300">style_sim</span> +<br />
+          &nbsp;&nbsp;w_desc × <span className="text-amber-300">desc_sim</span> +<br />
           &nbsp;&nbsp;0.05 × <span className="text-gray-400">recency_bonus</span>
         </p>
         <p className="mt-3 text-xs text-gray-500 leading-relaxed">
-          Where each <code className="text-violet-300 bg-violet-500/10 px-1 rounded">*_sim</code> is the cosine similarity between the user&apos;s profile embedding and the movie&apos;s pre-computed semantic block embedding.
+          Where each <code className="text-violet-300 bg-violet-500/10 px-1 rounded">*_sim</code> is cosine similarity between your profile embedding and the movie embedding. Mood/Theme/Style weights are slider-driven, while Description keeps a strong baseline.
         </p>
       </div>
     </div>

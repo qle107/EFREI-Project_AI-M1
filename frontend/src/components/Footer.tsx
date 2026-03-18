@@ -14,11 +14,11 @@ const STACK_ITEMS = [
 ];
 
 const SCORE_WEIGHTS = [
-  { label: "Mood",        pct: 35, color: "#8b5cf6" },
-  { label: "Theme",       pct: 25, color: "#3b82f6" },
-  { label: "Style",       pct: 20, color: "#10b981" },
-  { label: "Description", pct: 15, color: "#f59e0b" },
-  { label: "Recency",     pct: 5,  color: "#6b7280" },
+  { label: "Mood",        range: "11–27%", visualPct: 27, color: "#8b5cf6" },
+  { label: "Theme",       range: "11–27%", visualPct: 27, color: "#3b82f6" },
+  { label: "Style",       range: "10–26%", visualPct: 26, color: "#10b981" },
+  { label: "Description", range: "34–52%", visualPct: 52, color: "#f59e0b" },
+  { label: "Recency",     range: "5% fixed",  visualPct: 5, color: "#6b7280" },
 ];
 
 export function Footer() {
@@ -45,7 +45,7 @@ export function Footer() {
               <span className="text-xs font-mono text-gray-600">Movies</span>
             </div>
             <p className="text-xs text-gray-500 leading-relaxed mb-4 max-w-xs">
-              AI-powered semantic movie recommendations: hybrid questionnaire (era, director), SBERT embeddings, weighted scoring (35/25/20/15/5), short-text enrichment, cinephile profile, and radar chart visualisation.
+              AI-powered semantic movie recommendations: hybrid questionnaire (era, director), SBERT embeddings, dynamic slider-driven scoring, short-text enrichment, cinephile profile, and radar chart visualisation.
             </p>
             {/* Status */}
             <div className="flex items-center gap-2 text-xs font-mono">
@@ -68,17 +68,17 @@ export function Footer() {
                   <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "rgba(255,255,255,0.06)" }}>
                     <div
                       className="h-full rounded-full"
-                      style={{ width: `${w.pct}%`, backgroundColor: w.color }}
+                      style={{ width: `${w.visualPct}%`, backgroundColor: w.color }}
                     />
                   </div>
-                  <span className="text-xs font-mono font-semibold w-8 text-right" style={{ color: w.color }}>
-                    {w.pct}%
+                  <span className="text-xs font-mono font-semibold w-14 text-right" style={{ color: w.color }}>
+                    {w.range}
                   </span>
                 </div>
               ))}
             </div>
             <p className="mt-3 text-[10px] font-mono text-gray-600 bg-black/30 rounded-lg px-3 py-2">
-              score = Σ wᵢ · cosine_sim(uᵢ, mᵢ) + ε_recency
+              score = dynamic Σ wᵢ · cosine_sim(uᵢ, mᵢ) + 0.05 · recency
             </p>
           </div>
 

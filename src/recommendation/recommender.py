@@ -1,6 +1,3 @@
-import pandas as pd
-
-
 class RecommendationEngine:
 
     def __init__(self, scored_df):
@@ -12,7 +9,7 @@ class RecommendationEngine:
         # Sort by semantic coverage
         ranked = self.df.sort_values(
             by="CoverageScore",
-            ascending=True
+            ascending=False,
         )
 
         # Keep Top 3
@@ -40,7 +37,19 @@ class RecommendationEngine:
                 ),
                 "DescScore": round(
                     row["DescScore"], 3
-                )
+                ),
+                "RawMoodSimilarity": round(
+                    row.get("RawMoodSimilarity", 0.0), 3
+                ),
+                "RawThemeSimilarity": round(
+                    row.get("RawThemeSimilarity", 0.0), 3
+                ),
+                "RawStyleSimilarity": round(
+                    row.get("RawStyleSimilarity", 0.0), 3
+                ),
+                "RawDescSimilarity": round(
+                    row.get("RawDescSimilarity", 0.0), 3
+                ),
             }
 
             recommendations.append(rec)

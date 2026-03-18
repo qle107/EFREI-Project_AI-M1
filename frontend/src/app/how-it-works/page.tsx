@@ -96,17 +96,15 @@ def build_profile_blocks(self, questionnaire):
     color: "#10b981",
     title: "Coverage Scoring",
     file: "src/scoring/coverage_scorer.py",
-    body: "The user vectors are compared against the pre-computed corpus matrices using cosine similarity. Each axis produces a similarity array of length 9,841. Scores are min-max normalized, then aggregated with fixed weights plus an exponential recency decay. The top 3 films by CoverageScore are returned.",
+    body: "The user vectors are compared against the pre-computed corpus matrices using cosine similarity. Each axis produces a similarity array of length 9,841. Scores are min-max normalized, then aggregated with dynamic weights (mood/theme/style from sliders, strong description base, recency tiebreaker). The top 3 films by CoverageScore are returned.",
     detail: [
-      { label: "Mood weight", val: "0.35  (35%)" },
-      { label: "Theme weight", val: "0.25  (25%)" },
-      { label: "Style weight", val: "0.20  (20%)" },
-      { label: "Desc weight", val: "0.15  (15%)" },
-      { label: "Recency weight", val: "0.05  →  exp(−(year_now − release_year) / 10)" },
+      { label: "Mood/Theme/Style", val: "Dynamic weights from sliders (1-5)" },
+      { label: "Description", val: "Strong base priority to avoid mode domination" },
+      { label: "Recency weight", val: "Fixed 0.05  →  exp(−(year_now − release_year) / 10)" },
       { label: "Normalization", val: "(sim − min) / (max − min + 1e-8)" },
       { label: "Output", val: "Top 3 films + per-axis scores" },
     ],
-    code: `# coverage_scorer.py — weighted aggregation
+    code: `# coverage_scorer.py — dynamic weighted aggregation
 mood_sim  = cosine_similarity([user["mood"]],  self.mood_emb)[0]
 theme_sim = cosine_similarity([user["theme"]], self.theme_emb)[0]
 style_sim = cosine_similarity([user["style"]], self.style_emb)[0]
@@ -117,7 +115,14 @@ mood_sim, theme_sim, style_sim, desc_sim = [normalize(s) for s in ...]
 
 recency = np.exp(-(year_now - df["release_year"]) / 10)
 
-score = 0.35*mood_sim + 0.25*theme_sim + 0.20*style_sim + 0.15*desc_sim + 0.05*recency`,
+weights = compute_axis_weights(questionnaire)  # slider-driven + strong description base
+score = (
+    weights["mood"]*mood_sim +
+    weights["theme"]*theme_sim +
+    weights["style"]*style_sim +
+    weights["description"]*desc_sim +
+    weights["recency"]*recency
+)`,
   },
   {
     n: "05",
@@ -153,7 +158,7 @@ const TECH_STACK = [
   { label: "Embedding model", val: "sentence-transformers/all-MiniLM-L6-v2", color: "#8b5cf6" },
   { label: "Vector dimensions", val: "384-dim dense float32 vectors", color: "#8b5cf6" },
   { label: "Similarity", val: "sklearn cosine_similarity (4 axes)", color: "#3b82f6" },
-  { label: "Scoring", val: "0.35 mood + 0.25 theme + 0.20 style + 0.15 desc + 0.05 recency", color: "#10b981" },
+  { label: "Scoring", val: "Dynamic: sliders set mood/theme/style; description has strong base; recency fixed at 5%", color: "#10b981" },
   { label: "LLM", val: "Ollama / Claude / Gemini · short-text enrichment · cinephile profile", color: "#ec4899" },
   { label: "LLM cache", val: "SHA-256 in-memory  ·  TTL 24h  ·  200 entries", color: "#ec4899" },
   { label: "Backend API", val: "FastAPI  (Python)", color: "#22d3ee" },
@@ -297,7 +302,7 @@ export default function HowItWorksPage() {
               { label: "4-axis embedding", color: "#8b5cf6" },
               { label: "hybrid questionnaire", color: "#8b5cf6" },
               { label: "cosine similarity", color: "#3b82f6" },
-              { label: "35/25/20/15/5 weights", color: "#10b981" },
+              { label: "dynamic slider-driven weights", color: "#10b981" },
               { label: "short-text enrichment", color: "#ec4899" },
               { label: "cinephile profile", color: "#ec4899" },
               { label: "radar charts", color: "#a78bfa" },
@@ -428,7 +433,7 @@ export default function HowItWorksPage() {
             <p className="text-[10px] font-mono text-violet-400 uppercase tracking-widest mb-1">frontend/src/components/RadarChart.tsx</p>
             <h2 className="text-lg font-bold text-white">Results visualization</h2>
             <p className="text-sm text-gray-400 mt-1">
-              Each recommended movie displays an SVG radar chart with four axes: Mood, Theme, Style, Description. Values come from the per-axis cosine similarity scores. A collapsible &quot;How we score&quot; section shows the weight breakdown (35% · 25% · 20% · 15% · 5%).
+              Each recommended movie displays an SVG radar chart with four axes: Mood, Theme, Style, Description. Values come from the per-axis cosine similarity scores. A collapsible &quot;How we score&quot; section explains dynamic slider-driven weights and shows the effective per-request breakdown.
             </p>
           </div>
           <div className="p-6">
@@ -478,13 +483,13 @@ export default function HowItWorksPage() {
               style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
             >
               <span className="text-gray-400">CoverageScore  =  </span>
-              <span style={{ color: "#8b5cf6" }}>0.35 × mood_sim</span>
+              <span style={{ color: "#8b5cf6" }}>w_mood × mood_sim</span>
               <span className="text-gray-600">  +  </span>
-              <span style={{ color: "#3b82f6" }}>0.25 × theme_sim</span>
+              <span style={{ color: "#3b82f6" }}>w_theme × theme_sim</span>
               <span className="text-gray-600">  +  </span>
-              <span style={{ color: "#10b981" }}>0.20 × style_sim</span>
+              <span style={{ color: "#10b981" }}>w_style × style_sim</span>
               <span className="text-gray-600">  +  </span>
-              <span style={{ color: "#f59e0b" }}>0.15 × desc_sim</span>
+              <span style={{ color: "#f59e0b" }}>w_desc × desc_sim</span>
               <span className="text-gray-600">  +  </span>
               <span style={{ color: "#6b7280" }}>0.05 × recency</span>
             </div>
@@ -492,18 +497,18 @@ export default function HowItWorksPage() {
             {/* Weight bars */}
             <div className="space-y-3">
               {[
-                { axis: "mood_sim", weight: 0.35, pct: "35%", color: "#8b5cf6", note: "Emotional atmosphere match" },
-                { axis: "theme_sim", weight: 0.25, pct: "25%", color: "#3b82f6", note: "Genre / thematic match" },
-                { axis: "style_sim", weight: 0.20, pct: "20%", color: "#10b981", note: "Narrative style match" },
-                { axis: "desc_sim", weight: 0.15, pct: "15%", color: "#f59e0b", note: "Free-text description match" },
-                { axis: "recency", weight: 0.05, pct: "5%", color: "#6b7280", note: "exp(−Δyear/10)  tiebreaker" },
+                { axis: "mood_sim", weight: 27, pct: "11–27%", color: "#8b5cf6", note: "Slider-driven range (Mood intensity)" },
+                { axis: "theme_sim", weight: 27, pct: "11–27%", color: "#3b82f6", note: "Slider-driven range (Theme interest)" },
+                { axis: "style_sim", weight: 26, pct: "10–26%", color: "#10b981", note: "Slider-driven range (Style interest)" },
+                { axis: "desc_sim", weight: 52, pct: "34–52%", color: "#f59e0b", note: "Strong base priority for free-text nuance" },
+                { axis: "recency", weight: 5, pct: "5%", color: "#6b7280", note: "Fixed exp(−Δyear/10) tiebreaker" },
               ].map((r) => (
                 <div key={r.axis} className="flex items-center gap-4">
                   <span className="font-mono text-xs w-20 shrink-0" style={{ color: r.color }}>{r.axis}</span>
                   <div className="flex-1 rounded-full h-1.5 bg-white/5 overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
-                      whileInView={{ width: `${r.weight * 100 / 0.35}%` }}
+                      whileInView={{ width: `${r.weight}%` }}
                       viewport={{ once: true }}
                       transition={{ duration: 0.6, delay: 0.1 }}
                       className="h-full rounded-full"

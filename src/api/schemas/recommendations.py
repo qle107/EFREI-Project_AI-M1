@@ -74,19 +74,19 @@ class RecommendationRequest(BaseModel):
         ...,
         ge=1,
         le=5,
-        description="How strong you want the mood to be. 1 = subtle background mood, 5 = mood is central and very pronounced.",
+        description="How strong you want the mood to be. 1 = subtle background mood, 5 = mood is central and very pronounced. This directly increases mood's weight in the final score.",
     )
     theme_interest: int = Field(
         ...,
         ge=1,
         le=5,
-        description="How important the theme/genre is to you. 1 = theme is secondary, 5 = theme is very important and should drive the match.",
+        description="How important the theme/genre is to you. 1 = theme is secondary, 5 = theme is very important and should drive the match. This directly increases theme's weight in the final score.",
     )
     style_interest: int = Field(
         ...,
         ge=1,
         le=5,
-        description="How important pacing and narrative style are. 1 = style matters little, 5 = pacing and style are very important.",
+        description="How important pacing and narrative style are. 1 = style matters little, 5 = pacing and style are very important. This directly increases style's weight in the final score.",
     )
 
 
@@ -101,6 +101,20 @@ class MovieRecommendationItem(BaseModel):
     theme_score: float = Field(..., description="Theme match score")
     style_score: float = Field(..., description="Style match score")
     desc_score: float = Field(..., description="Description match score")
+    raw_mood_similarity: float | None = Field(None, description="Raw cosine similarity for mood before normalization")
+    raw_theme_similarity: float | None = Field(None, description="Raw cosine similarity for theme before normalization")
+    raw_style_similarity: float | None = Field(None, description="Raw cosine similarity for style before normalization")
+    raw_desc_similarity: float | None = Field(None, description="Raw cosine similarity for description before normalization")
+
+
+class ScoreWeights(BaseModel):
+    """Effective per-request weights used in CoverageScore aggregation."""
+
+    mood: float = Field(..., description="Weight applied to MoodScore")
+    theme: float = Field(..., description="Weight applied to ThemeScore")
+    style: float = Field(..., description="Weight applied to StyleScore")
+    description: float = Field(..., description="Weight applied to DescScore")
+    recency: float = Field(..., description="Weight applied to RecencyScore")
 
 
 class RecommendationResponse(BaseModel):
@@ -112,7 +126,8 @@ class RecommendationResponse(BaseModel):
     description_enriched: bool = Field(False, description="True if the user description was too short and was enriched by GenAI")
     cached: bool = Field(False, description="True if the GenAI explanation was served from cache")
     preset_id: Optional[str] = Field(None, description="Preset query ID if this was a preset request")
-    llm_provider: Optional[str] = Field(None, description="LLM used for the explanation: ollama or anthropic")
+    llm_provider: Optional[str] = Field(None, description="LLM used for the explanation: ollama, anthropic, or gemini")
+    score_weights: ScoreWeights = Field(..., description="Effective dynamic weights used for this request")
 
 
 class PresetQueryItem(BaseModel):

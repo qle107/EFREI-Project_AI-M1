@@ -108,13 +108,33 @@ const SAMPLE_DESCRIPTIONS: { label: string; emoji: string; text: string }[] = [
   { label: "Crime / Noir", emoji: "🔫", text: "A dark crime or noir story with moral ambiguity, double-crosses, and a gritty atmosphere. Complex characters, sharp dialogue, and a twist I didn't see coming." },
 ];
 
-const SCORE_WEIGHTS = [
-  { label: "Mood",        pct: 35, color: "#8b5cf6" },
-  { label: "Theme",       pct: 25, color: "#3b82f6" },
-  { label: "Style",       pct: 20, color: "#10b981" },
-  { label: "Description", pct: 15, color: "#f59e0b" },
-  { label: "Recency",     pct: 5,  color: "#6b7280" },
-];
+type ScoreWeights = {
+  mood: number;
+  theme: number;
+  style: number;
+  description: number;
+  recency: number;
+};
+
+const DEFAULT_SCORE_WEIGHTS: ScoreWeights = {
+  mood: 0.35,
+  theme: 0.25,
+  style: 0.20,
+  description: 0.15,
+  recency: 0.05,
+};
+
+const toPct = (weight: number) => `${Math.round(weight * 100)}%`;
+
+function buildWeightRows(weights: ScoreWeights) {
+  return [
+    { label: "Mood", pct: Math.round(weights.mood * 100), color: "#8b5cf6" },
+    { label: "Theme", pct: Math.round(weights.theme * 100), color: "#3b82f6" },
+    { label: "Style", pct: Math.round(weights.style * 100), color: "#10b981" },
+    { label: "Description", pct: Math.round(weights.description * 100), color: "#f59e0b" },
+    { label: "Recency", pct: Math.round(weights.recency * 100), color: "#6b7280" },
+  ];
+}
 
 const POSTER_PLACEHOLDER = "https://placehold.co/300x450/1a1a1a/666666?text=No+Poster";
 
@@ -383,6 +403,41 @@ function parseExplanation(raw: string): ParsedExplanation {
   return result;
 }
 
+function normalizeMovieTitle(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function buildFallbackFilmInsight(movie: MovieRecommendationItem): string {
+  const axes = [
+    { key: "mood_score", label: "mood", value: movie.mood_score },
+    { key: "theme_score", label: "theme", value: movie.theme_score },
+    { key: "style_score", label: "style", value: movie.style_score },
+    { key: "desc_score", label: "description", value: movie.desc_score },
+  ] as const;
+  const sorted = [...axes].sort((a, b) => b.value - a.value);
+  const strongest = sorted[0];
+  const second = sorted[1];
+  const weakest = sorted[sorted.length - 1];
+  return `${movie.title} is recommended mainly because its ${strongest.label} match is strong (${Math.round(strongest.value * 100)}%), reinforced by ${second.label} (${Math.round(second.value * 100)}%). The weaker area is ${weakest.label} (${Math.round(weakest.value * 100)}%), so refining that preference may improve precision.`;
+}
+
+function resolveFilmInsight(
+  movie: MovieRecommendationItem,
+  index: number,
+  parsed: ParsedExplanation,
+): string {
+  const normalizedTitle = normalizeMovieTitle(movie.title);
+  const byTitle = parsed.films.find(
+    (item) => normalizeMovieTitle(item.title) === normalizedTitle && item.text.trim().length > 0,
+  );
+  if (byTitle) return byTitle.text.trim();
+
+  const byIndex = parsed.films[index]?.text?.trim();
+  if (byIndex) return byIndex;
+
+  return buildFallbackFilmInsight(movie);
+}
+
 // ─── RECOMMENDATION CARD ──────────────────────────────────────────────────────
 
 const RANK_COLORS = ["#fbbf24", "#94a3b8", "#cd7c2f"];
@@ -400,6 +455,12 @@ function RecommendationCard({
 }) {
   const coveragePct = Math.min(100, Math.max(0, movie.coverage_score * 100));
   const matchColor = coveragePct >= 70 ? "#4ade80" : coveragePct >= 50 ? "#fbbf24" : "#f87171";
+  const rawPairs = [
+    { label: "Mood", value: movie.raw_mood_similarity },
+    { label: "Theme", value: movie.raw_theme_similarity },
+    { label: "Style", value: movie.raw_style_similarity },
+    { label: "Desc", value: movie.raw_desc_similarity },
+  ].filter((item) => typeof item.value === "number");
 
   return (
     <motion.div
@@ -477,6 +538,21 @@ function RecommendationCard({
             </div>
           </div>
 
+          {rawPairs.length > 0 && (
+            <div className="pt-3 border-t border-white/8">
+              <p className="text-[10px] font-mono uppercase tracking-widest text-gray-500 mb-2">
+                Raw cosine preview
+              </p>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] font-mono text-gray-500">
+                {rawPairs.map((item) => (
+                  <span key={item.label}>
+                    {item.label}: {item.value!.toFixed(3)}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
           <button
             type="button"
             onClick={onDetails}
@@ -520,12 +596,14 @@ function RecommendationCard({
 // ─── COMPARATIVE ANALYSIS PANEL ───────────────────────────────────────────────
 
 const FILM_COLORS = ["#fbbf24", "#94a3b8", "#cd7c2f"];
-const DIM_META = [
-  { key: "mood_score",  label: "Mood",  short: "Mood",  color: "#8b5cf6", weight: "35%" },
-  { key: "theme_score", label: "Theme", short: "Theme", color: "#3b82f6", weight: "25%" },
-  { key: "style_score", label: "Style", short: "Style", color: "#10b981", weight: "20%" },
-  { key: "desc_score",  label: "Desc",  short: "Desc",  color: "#f59e0b", weight: "15%" },
-] as const;
+function buildDimMeta(weights: ScoreWeights) {
+  return [
+    { key: "mood_score", label: "Mood", short: "Mood", color: "#8b5cf6", weight: toPct(weights.mood) },
+    { key: "theme_score", label: "Theme", short: "Theme", color: "#3b82f6", weight: toPct(weights.theme) },
+    { key: "style_score", label: "Style", short: "Style", color: "#10b981", weight: toPct(weights.style) },
+    { key: "desc_score", label: "Desc", short: "Desc", color: "#f59e0b", weight: toPct(weights.description) },
+  ] as const;
+}
 
 function heatCell(value: number) {
   const pct = Math.round(Math.min(100, Math.max(0, value * 100)));
@@ -544,8 +622,8 @@ function heatCell(value: number) {
   return { pct, bg, color };
 }
 
-function ScoreHeatmap({ movies }: { movies: MovieRecommendationItem[] }) {
-  const dims = [...DIM_META, { key: "coverage_score", label: "Overall", short: "Overall", color: "#a78bfa", weight: "Σ" } as const];
+function ScoreHeatmap({ movies, scoreWeights }: { movies: MovieRecommendationItem[]; scoreWeights: ScoreWeights }) {
+  const dims = [...buildDimMeta(scoreWeights), { key: "coverage_score", label: "Overall", short: "Overall", color: "#a78bfa", weight: "Σ" } as const];
   return (
     <div className="overflow-x-auto">
       <p className="text-xs text-gray-500 mb-4 font-mono">
@@ -614,7 +692,8 @@ function ScoreHeatmap({ movies }: { movies: MovieRecommendationItem[] }) {
   );
 }
 
-function GroupedBarChart({ movies }: { movies: MovieRecommendationItem[] }) {
+function GroupedBarChart({ movies, scoreWeights }: { movies: MovieRecommendationItem[]; scoreWeights: ScoreWeights }) {
+  const dimMeta = buildDimMeta(scoreWeights);
   const barW = 24;
   const gap = 7;
   const groupGap = 36;
@@ -625,7 +704,7 @@ function GroupedBarChart({ movies }: { movies: MovieRecommendationItem[] }) {
   const svgH = marginT + chartH + marginB;
   const n = movies.length;
   const groupW = n * barW + (n - 1) * gap;
-  const totalChartW = DIM_META.length * groupW + (DIM_META.length - 1) * groupGap;
+  const totalChartW = dimMeta.length * groupW + (dimMeta.length - 1) * groupGap;
   const viewW = marginL + totalChartW + 16;
   const gridVals = [0, 25, 50, 75, 100];
 
@@ -669,7 +748,7 @@ function GroupedBarChart({ movies }: { movies: MovieRecommendationItem[] }) {
         })}
 
         {/* Bars + labels */}
-        {DIM_META.map((dim, di) => {
+        {dimMeta.map((dim, di) => {
           const groupX = marginL + 8 + di * (groupW + groupGap);
           const dimScores = movies.map((m) => Number(m[dim.key] ?? 0));
           return (
@@ -744,7 +823,7 @@ function GroupedBarChart({ movies }: { movies: MovieRecommendationItem[] }) {
   );
 }
 
-function ComparisonPanel({ movies }: { movies: MovieRecommendationItem[] }) {
+function ComparisonPanel({ movies, scoreWeights }: { movies: MovieRecommendationItem[]; scoreWeights: ScoreWeights }) {
   const [view, setView] = useState<"heatmap" | "bars" | "radars">("heatmap");
   const VIEW_LABELS = { heatmap: "Heatmap", bars: "Bar chart", radars: "Radar" };
   return (
@@ -787,12 +866,12 @@ function ComparisonPanel({ movies }: { movies: MovieRecommendationItem[] }) {
         <AnimatePresence mode="wait">
           {view === "bars" && (
             <motion.div key="bars" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <GroupedBarChart movies={movies} />
+              <GroupedBarChart movies={movies} scoreWeights={scoreWeights} />
             </motion.div>
           )}
           {view === "heatmap" && (
             <motion.div key="heatmap" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <ScoreHeatmap movies={movies} />
+              <ScoreHeatmap movies={movies} scoreWeights={scoreWeights} />
             </motion.div>
           )}
           {view === "radars" && (
@@ -837,8 +916,9 @@ function ComparisonPanel({ movies }: { movies: MovieRecommendationItem[] }) {
 
 // ─── SCORING FORMULA ──────────────────────────────────────────────────────────
 
-function ScoringFormula() {
+function ScoringFormula({ scoreWeights }: { scoreWeights: ScoreWeights }) {
   const [open, setOpen] = useState(false);
+  const weightRows = buildWeightRows(scoreWeights);
   return (
     <div className="mb-6">
       <button
@@ -860,10 +940,10 @@ function ScoringFormula() {
           >
             <div className="mt-3 rounded-2xl border border-white/10 bg-zinc-900/70 p-5 space-y-4">
               <p className="text-xs text-gray-400 leading-relaxed">
-                Each movie is scored by cosine similarity between your preference embeddings and the movie&apos;s semantic blocks — across 4 dimensions, weighted by importance.
+                Each movie is scored by cosine similarity across 4 dimensions. Mood, Theme, and Style weights are dynamically adjusted by your sliders, Description keeps a strong base priority, and Recency stays a light tiebreaker.
               </p>
               <div className="space-y-2.5">
-                {SCORE_WEIGHTS.map((w) => (
+                {weightRows.map((w) => (
                   <div key={w.label} className="flex items-center gap-3">
                     <span className="text-xs text-gray-400 w-24 shrink-0">{w.label}</span>
                     <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "rgba(255,255,255,0.06)" }}>
@@ -880,7 +960,7 @@ function ScoringFormula() {
                 ))}
               </div>
               <p className="text-[11px] text-gray-600 font-mono bg-black/40 rounded-lg px-3 py-2">
-                Score = 0.35×Mood + 0.25×Theme + 0.20×Style + 0.15×Desc + 0.05×Recency
+                Score = wMood×Mood + wTheme×Theme + wStyle×Style + wDesc×Desc + wRecency×Recency
               </p>
             </div>
           </motion.div>
@@ -916,6 +996,7 @@ export default function RecommendPage() {
   const [explanation, setExplanation] = useState("");
   const [cinephileProfile, setCinephileProfile] = useState("");
   const [descriptionEnriched, setDescriptionEnriched] = useState(false);
+  const [scoreWeights, setScoreWeights] = useState<ScoreWeights>(DEFAULT_SCORE_WEIGHTS);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [modalMovie, setModalMovie] = useState<MovieDetail | null>(null);
@@ -984,6 +1065,7 @@ export default function RecommendPage() {
     setExplanation("");
     setCinephileProfile("");
     setDescriptionEnriched(false);
+    setScoreWeights(DEFAULT_SCORE_WEIGHTS);
     try {
       const data = await getRecommendations(token, {
         description: description || "I enjoy compelling stories with strong characters.",
@@ -1000,6 +1082,7 @@ export default function RecommendPage() {
       setExplanation(data.explanation);
       setCinephileProfile(data.cinephile_profile || "");
       setDescriptionEnriched(data.description_enriched || false);
+      setScoreWeights(data.score_weights || DEFAULT_SCORE_WEIGHTS);
       if (data.llm_provider) setLlmProviderFromResponse(data.llm_provider);
       setSubmitted(true);
       setViewingHistoryId(null);
@@ -1030,12 +1113,14 @@ export default function RecommendPage() {
     setExplanation("");
     setCinephileProfile("");
     setDescriptionEnriched(false);
+    setScoreWeights(DEFAULT_SCORE_WEIGHTS);
     try {
       const data = await getPresetRecommendations(token, preset.id);
       setRecommendations(data.recommendations);
       setExplanation(data.explanation);
       setCinephileProfile(data.cinephile_profile || "");
       setDescriptionEnriched(data.description_enriched || false);
+      setScoreWeights(data.score_weights || DEFAULT_SCORE_WEIGHTS);
       if (data.llm_provider) setLlmProviderFromResponse(data.llm_provider);
       setSubmitted(true);
       loadHistory();
@@ -1078,6 +1163,7 @@ export default function RecommendPage() {
       setExplanation(res.explanation ?? "");
       setCinephileProfile(res.cinephile_profile ?? "");
       setDescriptionEnriched(res.description_enriched ?? false);
+      setScoreWeights((res.score_weights as ScoreWeights | undefined) ?? DEFAULT_SCORE_WEIGHTS);
       setLastPresetLabel(res.preset_id ? `Preset: ${res.preset_id}` : null);
       if (res.llm_provider) setLlmProviderFromResponse(res.llm_provider);
       setViewingHistoryId(entry.id);
@@ -1099,6 +1185,7 @@ export default function RecommendPage() {
     setRecommendations([]);
     setExplanation("");
     setCinephileProfile("");
+    setScoreWeights(DEFAULT_SCORE_WEIGHTS);
     setLlmProviderFromResponse(undefined);
   };
 
@@ -1330,7 +1417,7 @@ export default function RecommendPage() {
                 <div className="rounded-xl border border-violet-500/15 p-4" style={{ backgroundColor: "rgba(139,92,246,0.06)" }}>
                   <p className="text-xs font-mono text-violet-400 mb-1">How this is used</p>
                   <p className="text-xs text-gray-400 leading-relaxed">
-                    Your text is passed through <span className="text-violet-300">sentence-transformers/all-MiniLM-L6-v2</span> to produce a 384-dim dense vector. This vector is compared against each film&apos;s pre-computed <code className="text-violet-300 bg-violet-500/10 px-1 rounded">desc_block</code> embedding via cosine similarity — contributing <span className="text-violet-300 font-semibold">15%</span> to the final coverage score.
+                    Your text is passed through <span className="text-violet-300">sentence-transformers/all-MiniLM-L6-v2</span> to produce a 384-dim dense vector. This vector is compared against each film&apos;s pre-computed <code className="text-violet-300 bg-violet-500/10 px-1 rounded">desc_block</code> embedding via cosine similarity — with a strong base contribution in the final coverage score.
                   </p>
                 </div>
               </motion.div>
@@ -1364,7 +1451,7 @@ export default function RecommendPage() {
                       ))}
                     </div>
                     <p className="mt-2 text-[10px] font-mono text-gray-600">
-                      mood_embedding → cosine_sim → <span className="text-violet-400">35% of coverage_score</span>
+                      mood_embedding → cosine_sim → <span className="text-violet-400">dynamic weight from Mood intensity slider</span>
                     </p>
                   </div>
                 )}
@@ -1377,7 +1464,7 @@ export default function RecommendPage() {
                 <div>
                   <p className="text-xs font-mono text-violet-400 uppercase tracking-widest mb-1">Step 3 of 5</p>
                   <h2 className="text-xl font-bold text-white mb-0.5">The genre</h2>
-                  <p className="text-xs text-gray-500">Narrative category — forms the <code className="text-blue-300 bg-blue-500/10 px-1 rounded">theme_block</code> embedding (25% of score), distinct from your <span className="text-amber-300">{preferredMood || "mood"}</span> axis.</p>
+                  <p className="text-xs text-gray-500">Narrative category — forms the <code className="text-blue-300 bg-blue-500/10 px-1 rounded">theme_block</code> embedding (dynamic weight from slider), distinct from your <span className="text-amber-300">{preferredMood || "mood"}</span> axis.</p>
                 </div>
 
                 {!options ? (
@@ -1399,7 +1486,7 @@ export default function RecommendPage() {
                       ))}
                     </div>
                     <p className="mt-2 text-[10px] font-mono text-gray-600">
-                      theme_embedding → cosine_sim → <span className="text-blue-400">25% of coverage_score</span>
+                      theme_embedding → cosine_sim → <span className="text-blue-400">dynamic weight from Theme interest slider</span>
                     </p>
                   </div>
                 )}
@@ -1412,7 +1499,7 @@ export default function RecommendPage() {
                 <div>
                   <p className="text-xs font-mono text-violet-400 uppercase tracking-widest mb-1">Step 4 of 5</p>
                   <h2 className="text-xl font-bold text-white mb-0.5">Style &amp; Era</h2>
-                  <p className="text-xs text-gray-500">How is the story told — forms <code className="text-emerald-300 bg-emerald-500/10 px-1 rounded">style_block</code> embedding (20% of score). Era &amp; director refine the profile.</p>
+                  <p className="text-xs text-gray-500">How is the story told — forms <code className="text-emerald-300 bg-emerald-500/10 px-1 rounded">style_block</code> embedding (dynamic weight from slider). Era &amp; director refine the profile.</p>
                 </div>
 
                 {!options ? (
@@ -1518,12 +1605,13 @@ export default function RecommendPage() {
                   <p className="text-xs font-semibold text-violet-400 uppercase tracking-widest">Full profile summary</p>
                   <div className="grid grid-cols-3 gap-1.5 text-[11px]">
                     {[
-                      { label: "Mood",     val: preferredMood,   dim: "35%", color: "#8b5cf6" },
-                      { label: "Genre",    val: preferredGenre,  dim: "25%", color: "#3b82f6" },
-                      { label: "Style",    val: preferredStyle,  dim: "20%", color: "#10b981" },
-                      { label: "Desc",     val: description ? `"${description.slice(0,30)}${description.length>30?"…":""}"` : "— (will be enriched)", dim: "15%", color: "#f59e0b" },
+                      { label: "Mood",     val: preferredMood,   dim: toPct(scoreWeights.mood), color: "#8b5cf6" },
+                      { label: "Genre",    val: preferredGenre,  dim: toPct(scoreWeights.theme), color: "#3b82f6" },
+                      { label: "Style",    val: preferredStyle,  dim: toPct(scoreWeights.style), color: "#10b981" },
+                      { label: "Desc",     val: description ? `"${description.slice(0,30)}${description.length>30?"…":""}"` : "— (will be enriched)", dim: toPct(scoreWeights.description), color: "#f59e0b" },
                       { label: "Era",      val: preferredEra || "any",    dim: "",    color: "#6b7280" },
                       { label: "Director", val: preferredDirector || "any", dim: "",  color: "#6b7280" },
+                      { label: "Recency",  val: "time-based tiebreaker", dim: toPct(scoreWeights.recency), color: "#6b7280" },
                     ].map((r) => (
                       <div key={r.label} className="flex items-start gap-1.5 rounded-lg px-2.5 py-1.5 border border-white/5" style={{ backgroundColor: "rgba(255,255,255,0.03)" }}>
                         <span className="font-mono text-[9px] mt-0.5 shrink-0 w-11" style={{ color: r.color }}>{r.label}{r.dim && <span className="text-gray-600 ml-1">{r.dim}</span>}</span>
@@ -1532,7 +1620,7 @@ export default function RecommendPage() {
                     ))}
                   </div>
                   <p className="text-[10px] font-mono text-gray-600 bg-black/30 rounded-lg px-3 py-1.5">
-                    score = 0.35×mood_sim + 0.25×theme_sim + 0.20×style_sim + 0.15×desc_sim + 0.05×recency
+                    score = wMood×mood_sim + wTheme×theme_sim + wStyle×style_sim + wDesc×desc_sim + wRecency×recency
                   </p>
                 </div>
               </motion.div>
@@ -1762,7 +1850,7 @@ export default function RecommendPage() {
                           <h2 className="text-lg font-semibold text-white">Comparative analysis</h2>
                           <p className="text-xs text-gray-500">Inspect score differences before reading each recommendation card.</p>
                         </div>
-                        <ComparisonPanel movies={recommendations} />
+                        <ComparisonPanel movies={recommendations} scoreWeights={scoreWeights} />
                       </div>
                     )}
 
@@ -1787,7 +1875,7 @@ export default function RecommendPage() {
                             movie={m}
                             rank={i + 1}
                             onDetails={() => openModal(m.film_id)}
-                            filmInsight={hasStructured ? parsed.films[i]?.text : undefined}
+                            filmInsight={resolveFilmInsight(m, i, parsed)}
                           />
                         ))}
                       </div>
@@ -1795,7 +1883,7 @@ export default function RecommendPage() {
 
                     {/* Scoring formula — full width footer */}
                     <div className="pt-1">
-                      <ScoringFormula />
+                      <ScoringFormula scoreWeights={scoreWeights} />
                     </div>
                   </div>
                 );

@@ -6,6 +6,13 @@ from src.core.config import EMBEDDINGS_DIR, PROCESSED_DIR
 
 
 class CoverageScorer:
+    RECENCY_WEIGHT = 0.05
+    SEMANTIC_WEIGHT_BUDGET = 0.95
+    DESCRIPTION_BASE_PRIORITY = 2.4
+    MOOD_BASE_PRIORITY = 0.5
+    THEME_BASE_PRIORITY = 0.5
+    STYLE_BASE_PRIORITY = 0.4
+    SLIDER_STEP = 0.2
 
     def __init__(self):
         # Load movie embeddings from Step 2
@@ -23,6 +30,56 @@ class CoverageScorer:
     def normalize(self, sim):
         return (sim - sim.min()) / (sim.max() - sim.min() + 1e-8)
 
+    @staticmethod
+    def _slider_value(questionnaire, field_name, default=3):
+        if questionnaire is None:
+            return default
+        value = getattr(questionnaire, field_name, default)
+        return max(1, min(5, int(value)))
+
+    def compute_axis_weights(self, questionnaire=None):
+        """Build dynamic weights from the questionnaire sliders."""
+        mood_interest = self._slider_value(questionnaire, "mood_intensity")
+        theme_interest = self._slider_value(questionnaire, "theme_interest")
+        style_interest = self._slider_value(questionnaire, "style_interest")
+
+        priorities = {
+            "mood": self.MOOD_BASE_PRIORITY + self.SLIDER_STEP * mood_interest,
+            "theme": self.THEME_BASE_PRIORITY + self.SLIDER_STEP * theme_interest,
+            "style": self.STYLE_BASE_PRIORITY + self.SLIDER_STEP * style_interest,
+            # Keep description strong so presets do not get dominated by one axis.
+            "description": self.DESCRIPTION_BASE_PRIORITY,
+        }
+
+        total_priority = sum(priorities.values())
+        semantic_weights = {
+            axis: self.SEMANTIC_WEIGHT_BUDGET * priority / total_priority
+            for axis, priority in priorities.items()
+        }
+        semantic_weights["recency"] = self.RECENCY_WEIGHT
+        return semantic_weights
+
+    def compute_raw_similarities(self, user_profile):
+        """Compute cosine similarities before any normalization."""
+        return {
+            "mood": cosine_similarity(
+                [user_profile["mood"]],
+                self.mood_emb
+            )[0],
+            "theme": cosine_similarity(
+                [user_profile["theme"]],
+                self.theme_emb
+            )[0],
+            "style": cosine_similarity(
+                [user_profile["style"]],
+                self.style_emb
+            )[0],
+            "description": cosine_similarity(
+                [user_profile["description"]],
+                self.desc_emb
+            )[0],
+        }
+
     # Compute Recency Score
     def compute_recency_score(self):
         year = self.df["release_year"].fillna(2000)
@@ -34,34 +91,22 @@ class CoverageScorer:
         return recency_score
 
     # MAIN SCORING FUNCTION
-    def compute_score(self, user_profile):
+    def compute_score(self, user_profile, questionnaire=None):
 
         # Compare USER vs MOVIES
+        raw_sim = self.compute_raw_similarities(user_profile)
+        weights = self.compute_axis_weights(questionnaire)
 
-        mood_sim = cosine_similarity(
-            [user_profile["mood"]],
-            self.mood_emb
-        )[0]
+        # Keep raw cosine similarities for explanation/debug preview only.
+        self.df["RawMoodSimilarity"] = raw_sim["mood"]
+        self.df["RawThemeSimilarity"] = raw_sim["theme"]
+        self.df["RawStyleSimilarity"] = raw_sim["style"]
+        self.df["RawDescSimilarity"] = raw_sim["description"]
 
-        theme_sim = cosine_similarity(
-            [user_profile["theme"]],
-            self.theme_emb
-        )[0]
-
-        style_sim = cosine_similarity(
-            [user_profile["style"]],
-            self.style_emb
-        )[0]
-
-        desc_sim = cosine_similarity(
-            [user_profile["description"]],
-            self.desc_emb
-        )[0]
-
-        mood_sim = self.normalize(mood_sim)
-        theme_sim = self.normalize(theme_sim)
-        style_sim = self.normalize(style_sim)
-        desc_sim = self.normalize(desc_sim)
+        mood_sim = self.normalize(raw_sim["mood"])
+        theme_sim = self.normalize(raw_sim["theme"])
+        style_sim = self.normalize(raw_sim["style"])
+        desc_sim = self.normalize(raw_sim["description"])
 
         recency_score = self.compute_recency_score()
 
@@ -71,13 +116,14 @@ class CoverageScorer:
         self.df["DescScore"] = desc_sim
         self.df["RecencyScore"] = recency_score
 
-        # AISCA Weighted Score: semantic blocks dominate (95%), recency is a light tiebreaker (5%)
+        # AISCA weighted score: sliders shape mood/theme/style, description stays strong,
+        # and recency remains a light tiebreaker.
         final_score = (
-                0.35 * mood_sim +
-                0.25 * theme_sim +
-                0.20 * style_sim +
-                0.15 * desc_sim +
-                0.05 * recency_score
+                weights["mood"] * mood_sim +
+                weights["theme"] * theme_sim +
+                weights["style"] * style_sim +
+                weights["description"] * desc_sim +
+                weights["recency"] * recency_score
         )
 
         self.df["CoverageScore"] = final_score

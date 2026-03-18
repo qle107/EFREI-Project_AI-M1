@@ -32,8 +32,8 @@ python scripts/generate_openapi.py
 ```bash
 # From project root (recommended: use a venv and pip install -r requirement.txt)
 python -m src.main
-# or: uvicorn api.api:app --reload --host 0.0.0.0 --port 8000
-# Ensure PYTHONPATH includes project root if needed.
+# or: uvicorn src.api.app:app --reload --host 0.0.0.0 --port 8000
+# Do not `cd src` first — imports use the `src.*` package and need the repo root on PYTHONPATH.
 ```
 
 ### Authentication (JWT)

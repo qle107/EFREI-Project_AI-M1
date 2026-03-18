@@ -108,6 +108,10 @@ def _top3_to_items(top3: list[dict]) -> list[MovieRecommendationItem]:
             theme_score=item["ThemeScore"],
             style_score=item["StyleScore"],
             desc_score=item["DescScore"],
+            raw_mood_similarity=item.get("RawMoodSimilarity"),
+            raw_theme_similarity=item.get("RawThemeSimilarity"),
+            raw_style_similarity=item.get("RawStyleSimilarity"),
+            raw_desc_similarity=item.get("RawDescSimilarity"),
         )
         for item in top3
     ]
