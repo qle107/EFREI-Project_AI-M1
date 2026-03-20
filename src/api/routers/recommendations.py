@@ -1,5 +1,5 @@
 """
-Movie recommendations: semantic AISCA pipeline.
+Movie recommendations: semantic CineWatch pipeline.
 
 Supports both custom queries and preset queries (pre-cached for instant results).
 """
@@ -28,7 +28,7 @@ from src.api.dependencies import (
 from src.api.schemas.auth import UserOut
 from src.user_profile.questionnaire_schema import UserQuestionnaire
 from src.recommendation.recommender import RecommendationEngine
-from src.genAi.prompt_builder import build_aisca_prompt, build_enrichment_prompt
+from src.genAi.prompt_builder import build_cinewatch_prompt, build_enrichment_prompt
 from src.genAi.preset_queries import PRESET_QUERIES, get_preset_by_id
 from src.core.llm_runtime_config import get_llm_runtime
 from src.core.recommendation_history import save as save_history, list_by_user as list_history, get_by_id as get_history_by_id
@@ -133,7 +133,7 @@ def _run_pipeline(
     engine = RecommendationEngine(scored_movies)
     top3 = engine.get_top3()
 
-    prompt = build_aisca_prompt(questionnaire, top3)
+    prompt = build_cinewatch_prompt(questionnaire, top3)
 
     cache_before = llm_client.cache_size
     cinephile_profile = None

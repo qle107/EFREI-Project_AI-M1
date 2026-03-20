@@ -7,7 +7,7 @@
 - Etablissement: **EFREI PARIS**
 - Formation: Mastère Data Engineering et IA
 - Annee universitaire: 2025-2026
-- Projet (titre): **AISCA Movie Recommender - Agent de recommandation semantique et generatif**
+- Projet (titre): **CineWatch Movie Recommender - Agent de recommandation semantique et generatif**
 - Etudiants (binome): **CHUEMBOU MBAH ADRIEN DUVAL** & **QUAND DAT LE**
 - Tuteur/Tutrice (selon le guide): **Sarah Malaeb**
 - Date: [JJ/MM/AAAA]
@@ -35,7 +35,7 @@ La solution implementee comprend:
 Resultats principaux:
 
 - Recommandations personnalisees basees sur 4 axes semantiques (Mood, Theme, Style, Description).
-- Score global AISCA pondere et interpretable.
+- Score global CineWatch pondere et interpretable.
 - Generation d'une explication et d'un profil cinephile.
 - Systeme de cache LLM (TTL + taille max) pour reduire latence/cout.
 - Ajout d'une logique de presets et historique utilisateur pour la soutenance et la reproductibilite.
@@ -141,7 +141,7 @@ Approche hybride proche Kanban/Agile:
 
 1. Nettoyage/structuration donnees.
 2. Pipeline embeddings.
-3. Scoring AISCA.
+3. Scoring CineWatch.
 4. API et schemas.
 5. Frontend de demonstration.
 6. Couche GenAI et cache.
@@ -598,7 +598,7 @@ Utiliser la structure detaillee de `PROJECT_DOCUMENTATION.md` section "Project S
 ### Annexe C - Prompts GenAI utilises
 
 1. Prompt d'enrichissement (`build_enrichment_prompt`)
-2. Prompt de justification (`build_aisca_prompt`)
+2. Prompt de justification (`build_cinewatch_prompt`)
 
 ### Annexe D - Variables d'environnement
 

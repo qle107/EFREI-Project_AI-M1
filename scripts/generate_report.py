@@ -1095,7 +1095,7 @@ add_code("""EFREI-Project_AI-M1/
 
 doc.add_heading("Annexe B — Prompts GenAI utilisés", level=2)
 doc.add_paragraph("1. Prompt d'enrichissement (build_enrichment_prompt) — voir §7.3")
-doc.add_paragraph("2. Prompt de justification (build_aisca_prompt) — voir §7.3")
+doc.add_paragraph("2. Prompt de justification (build_cinewatch_prompt) — voir §7.3")
 
 doc.add_heading("Annexe C — Variables d'environnement", level=2)
 add_table(

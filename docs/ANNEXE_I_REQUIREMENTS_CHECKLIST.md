@@ -3,15 +3,15 @@
 **Source:** *Projet IA Générative — Agent Intelligent Sémantique et Génératif — Annexe I - Thématiques alternatives acceptées VFinale*  
 **Context:** EFREI Data Engineering & AI 2025-26 — RNCP40875 Bloc 2 (Expert en ingénierie de données)
 
-This document breaks down all requirements from Annexe I into **Required**, **Recommended**, and **Optional** checkpoints for the AISCA project (including the *Recommandation de films* theme).
+This document breaks down all requirements from Annexe I into **Required**, **Recommended**, and **Optional** checkpoints for the CineWatch project (including the *Recommandation de films* theme).
 
 ---
 
 ## Document role
 
-- Annexe I **does not replace** the main AISCA subject.
+- Annexe I **does not replace** the main CineWatch subject.
 - It describes **accepted alternative themes** (cinema, music, health, books, wine, perfumes, etc.) and how to **transpose** the same methodology to another domain.
-- **All technical, pedagogical, and evaluation criteria** remain defined in the **main AISCA document**; the annex only clarifies thematic variants and transposition.
+- **All technical, pedagogical, and evaluation criteria** remain defined in the **main CineWatch document**; the annex only clarifies thematic variants and transposition.
 
 ---
 
@@ -32,7 +32,7 @@ This document breaks down all requirements from Annexe I into **Required**, **Re
 | # | Checkpoint | Level | Notes |
 |---|------------|--------|--------|
 | 1.1.1 | Analysis is **contextual and semantic**, not purely numerical | **Required** | Scores must reflect meaning, not only counts or ratings. |
-| 1.1.2 | User inputs mapped to "blocs" via **word or contextual embeddings** (e.g. Word2Vec, GloVe, fastText, BERT, **SBERT**) | **Required** | SBERT (contextual) is the expected choice in AISCA. |
+| 1.1.2 | User inputs mapped to "blocs" via **word or contextual embeddings** (e.g. Word2Vec, GloVe, fastText, BERT, **SBERT**) | **Required** | SBERT (contextual) is the expected choice in CineWatch. |
 | 1.1.3 | Use **similarity measures** (cosine similarity, semantic clustering) | **Required** | Cosine similarity with embeddings is the baseline. |
 | 1.1.4 | **Coverage score** computed from several blocks (weights, thresholds, or aggregation rules) | **Required** | Single scalar or composite score combining multiple dimensions. |
 | 1.1.5 | System produces a **user profile** and **suggests ordered recommendations** (e.g. top 3) | **Required** | Profile = encoded preferences; output = ranked list. |
@@ -181,10 +181,10 @@ Use this to verify coverage before submission.
 
 ## 6. References
 
-- **Main subject:** *Analyse Sémantique pour la Cartographie des Compétences et la Recommandation de Métiers / AISCA : Agent Intelligent Sémantique et Génératif pour la Cartographie des Compétences* (full requirements and grading).
+- **Main subject:** *Analyse Sémantique pour la Cartographie des Compétences et la Recommandation de Métiers / CineWatch : Agent Intelligent Sémantique et Génératif pour la Cartographie des Compétences* (full requirements and grading).
 - **Annexe I:** *Projet IA Générative — Agent Intelligent Sémantique et Génératif — Annexe I - Thématiques alternatives acceptées VFinale* (this checklist’s source).
 - **RNCP40875** — Bloc 2: *Piloter et implémenter des solutions d’IA en s’aidant notamment de l’IA générative.*
 
 ---
 
-*Document generated for the AISCA movie recommender project. Complete grading criteria and detailed expectations remain in the main AISCA subject.*
+*Document generated for the CineWatch movie recommender project. Complete grading criteria and detailed expectations remain in the main CineWatch subject.*

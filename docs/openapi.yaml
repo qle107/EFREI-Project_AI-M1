@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
-  title: AISCA Semantic Movie Recommender API
-  description: 'Semantic movie recommendation API powered by AISCA: user preferences
+  title: CineWatch Semantic Movie Recommender API
+  description: 'Semantic movie recommendation API powered by CineWatch: user preferences
     are encoded and matched against a movie referential. Top 3 recommendations are
     returned with an AI-generated explanation.'
   version: 1.0.0

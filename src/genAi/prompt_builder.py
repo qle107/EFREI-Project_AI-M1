@@ -1,4 +1,4 @@
-def build_aisca_prompt(user_input, top3):
+def build_cinewatch_prompt(user_input, top3):
     movies_context = ""
     for i, movie in enumerate(top3, 1):
         movies_context += (

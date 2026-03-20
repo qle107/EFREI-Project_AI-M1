@@ -26,7 +26,7 @@ def create_app() -> FastAPI:
         title=API_TITLE,
         version=API_VERSION,
         description=(
-            "Semantic movie recommendation API powered by AISCA: "
+            "Semantic movie recommendation API powered by CineWatch: "
             "user preferences are encoded and matched against a movie referential. "
             "Top 3 recommendations are returned with an AI-generated explanation."
         ),
@@ -55,7 +55,7 @@ def create_app() -> FastAPI:
     @app.get("/", tags=["Root"])
     def root():
         return {
-            "message": "AISCA Movie Recommender API",
+            "message": "CineWatch Movie Recommender API",
             "docs": "/docs",
             "redoc": "/redoc",
             "openapi": "/openapi.json",

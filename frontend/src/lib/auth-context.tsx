@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import type { User } from "./api";
 import { getMe, refreshTokens, setOnUnauthorized } from "./api";
 
-const ACCESS_KEY = "aisca_access_token";
-const REFRESH_KEY = "aisca_refresh_token";
-const USER_KEY = "aisca_user";
+const ACCESS_KEY = "cinewatch_access_token";
+const REFRESH_KEY = "cinewatch_refresh_token";
+const USER_KEY = "cinewatch_user";
 
 interface AuthContextType {
   user: User | null;

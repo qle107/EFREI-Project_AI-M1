@@ -87,5 +87,5 @@ LLM_CACHE_MAX_SIZE: int = int(os.getenv("LLM_CACHE_MAX_SIZE", "200"))
 
 # API
 API_V1_PREFIX: str = "/api/v1"
-API_TITLE: str = "AISCA Semantic Movie Recommender API"
+API_TITLE: str = "CineWatch Semantic Movie Recommender API"
 API_VERSION: str = "1.0.0"

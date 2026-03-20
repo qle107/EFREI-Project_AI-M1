@@ -26,4 +26,4 @@ def create_referential(
 
     df.to_csv(output_path, index=False)
 
-    print("AISCA Referential Created ✔")
+    print("CineWatch Referential Created ✔")

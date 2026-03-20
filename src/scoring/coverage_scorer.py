@@ -116,7 +116,7 @@ class CoverageScorer:
         self.df["DescScore"] = desc_sim
         self.df["RecencyScore"] = recency_score
 
-        # AISCA weighted score: sliders shape mood/theme/style, description stays strong,
+        # CineWatch weighted score: sliders shape mood/theme/style, description stays strong,
         # and recency remains a light tiebreaker.
         final_score = (
                 weights["mood"] * mood_sim +

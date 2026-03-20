@@ -39,6 +39,9 @@ frontend/out/
 # Data (SQLite history, processed outputs)
 data/
 
+# Documentation
+docs/
+
 # Logs
 *.log
 logs/

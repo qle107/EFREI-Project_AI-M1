@@ -15,7 +15,7 @@ class RecommendationEngine:
         # Keep Top 3
         top3 = ranked.head(3)
 
-        # Format AISCA Output
+        # Format CineWatch Output
         recommendations = []
 
         for _, row in top3.iterrows():

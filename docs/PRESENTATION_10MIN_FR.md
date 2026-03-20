@@ -1,8 +1,8 @@
-# Presentation 10 Minutes - AISCA Movie Recommender
+# Presentation 10 Minutes - CineWatch Movie Recommender
 
 ## Objectif de ce document
 
-Ce document est un guide simple pour presenter le projet **AISCA Movie Recommender** en **10 minutes**, en **francais simple**, tout en gardant les **termes techniques importants**.  
+Ce document est un guide simple pour presenter le projet **CineWatch Movie Recommender** en **10 minutes**, en **francais simple**, tout en gardant les **termes techniques importants**.  
 L'idee n'est pas de tout dire, mais de montrer:
 
 - le probleme,
@@ -22,7 +22,7 @@ Exemple: "D'abord, je vais presenter le besoin. Ensuite, je vais montrer l'archi
 
 ### Ce que tu peux dire
 
-"Bonjour, aujourd'hui je vais vous presenter notre projet **AISCA Movie Recommender**, un systeme de recommandation de films base sur l'**IA semantique** et l'**IA generative**.  
+"Bonjour, aujourd'hui je vais vous presenter notre projet **CineWatch Movie Recommender**, un systeme de recommandation de films base sur l'**IA semantique** et l'**IA generative**.  
 Le but du projet est de recommander des films a partir d'une demande utilisateur exprimee en langage naturel, par exemple: *je veux un thriller de science-fiction sombre avec une atmosphere tendue*.  
 Notre systeme transforme cette demande en profil utilisateur, compare ce profil avec une base de films, puis retourne les **3 meilleures recommandations** avec une **explication generee par IA**."
 
@@ -227,7 +227,7 @@ Tu peux utiliser ce script court presque mot pour mot.
 
 ### Script court
 
-"Bonjour, je vais presenter notre projet AISCA Movie Recommender.  
+"Bonjour, je vais presenter notre projet CineWatch Movie Recommender.  
 C'est un systeme de recommandation de films base sur l'IA semantique et l'IA generative.
 
 Le probleme est que les recommandations classiques ne comprennent pas bien les demandes naturelles et nuancees des utilisateurs.  

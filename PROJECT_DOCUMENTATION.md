@@ -1,4 +1,4 @@
-# AISCA Movie Recommender — Project Documentation
+# CineWatch Movie Recommender — Project Documentation
 
 **Full technical documentation of the EFREI AI M1 movie recommendation system**
 
@@ -21,7 +21,7 @@
 
 ## 1. Project Overview
 
-**AISCA** (AI Semantic Coverage Analysis) is an AI-powered movie recommendation system that combines:
+**CineWatch** (AI Semantic Coverage Analysis) is an AI-powered movie recommendation system that combines:
 
 - **Semantic embeddings** (Sentence-BERT) for understanding movie content and user preferences
 - **Multi-dimensional scoring** across mood, theme, narrative style, and description
@@ -271,7 +271,7 @@ Additional columns after cleaning:
 
 ### 3.4 Processed Referential (movies_referential.csv)
 
-Produced by the preprocessing pipeline for AISCA scoring:
+Produced by the preprocessing pipeline for CineWatch scoring:
 
 
 | Column           | Type   | Description                                                |
@@ -396,7 +396,7 @@ models/embeddings/
   └── desc_embeddings.npy
 ```
 
-### 5.2 Online AISCA Recommendation Flow
+### 5.2 Online CineWatch Recommendation Flow
 
 ```
 Client: POST /api/v1/recommendations (Bearer JWT)
@@ -426,7 +426,7 @@ Client: POST /api/v1/recommendations (Bearer JWT)
           │
           ▼
 ┌───────────────────┐
-│ build_aisca_      │  Build prompt with user request + top 3 + scores
+│ build_cinewatch_  │  Build prompt with user request + top 3 + scores
 │ prompt            │
 └─────────┬─────────┘
           │
@@ -488,7 +488,7 @@ Text is lowercased and scanned with regex `\b{keyword}\b` for word-boundary matc
 
 **Implementation**: `sklearn.metrics.pairwise.cosine_similarity`
 
-### 6.3 AISCA Weighted Score
+### 6.3 CineWatch Weighted Score
 
 
 \text{CoverageScore} = 0.35 \cdot \text{MoodScore} + 0.25 \cdot \text{ThemeScore} + 0.20 \cdot \text{StyleScore} + 0.15 \cdot \text{DescScore} + 0.05 \cdot \text{RecencyScore}
@@ -586,7 +586,7 @@ Additional metadata returned with each recommendation:
 The system includes curated presets in `src/genAi/preset_queries.py` (e.g., dark crime thriller, epic fantasy, psychological horror):
 
 - `GET /api/v1/recommendations/presets` lists all presets.
-- `POST /api/v1/recommendations/presets/{preset_id}` runs the full AISCA pipeline using preset fields.
+- `POST /api/v1/recommendations/presets/{preset_id}` runs the full CineWatch pipeline using preset fields.
 - LLM response cache makes repeated preset calls near-instant, useful for demos and soutenance.
 
 ### 7.7 Recommendation History (Traceability)
@@ -630,7 +630,7 @@ Supported runtime controls:
 - **Class**: `MovieRecommenderPipeline`
 - **Input**: Free-text user query
 - **Output**: Top-K movies + LLM explanation
-- **Difference from AISCA**: Single combined embedding per movie (no block decomposition)
+- **Difference from CineWatch**: Single combined embedding per movie (no block decomposition)
 
 ---
 

@@ -5,7 +5,7 @@ from src.user_profile.profile_encoder import UserProfileEncoder
 from src.user_profile.questionnaire_schema import UserQuestionnaire
 from src.scoring.coverage_scorer import CoverageScorer
 from src.recommendation.recommender import RecommendationEngine
-from src.genAi.prompt_builder import build_aisca_prompt
+from src.genAi.prompt_builder import build_cinewatch_prompt
 from src.genAi.llm_client import LLMClient
 from src.visualization.radar_plot import plot_radar_chart
 
@@ -125,8 +125,8 @@ scored_movies = scorer.compute_score(user_profile)
 engine = RecommendationEngine(scored_movies)
 top3 = engine.get_top3()
 
-# AISCA Prompt
-prompt = build_aisca_prompt(user_input, top3)
+# CineWatch Prompt
+prompt = build_cinewatch_prompt(user_input, top3)
 
 # ONE LLM CALL
 llm = LLMClient()
@@ -135,7 +135,7 @@ explanation = llm.generate(prompt)
 print("\nGENAI EXPLANATION:\n")
 print(explanation)
 
-st.title("AISCA Movie Recommendation Dashboard")
+st.title("CineWatch Movie Recommendation Dashboard")
 
 # -------------------------
 # User Input Form

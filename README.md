@@ -1,6 +1,6 @@
 # EFREI-Project_AI-M1
 
-AISCA Semantic Movie Recommender ? backend API and pipeline.
+CineWatch Semantic Movie Recommender ? backend API and pipeline.
 
 ## Backend API
 
