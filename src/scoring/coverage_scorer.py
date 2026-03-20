@@ -6,7 +6,7 @@ from src.core.config import EMBEDDINGS_DIR, PROCESSED_DIR
 
 
 class CoverageScorer:
-    RECENCY_WEIGHT = 0.1
+    RECENCY_WEIGHT = 0.05
     SEMANTIC_WEIGHT_BUDGET = 0.9
     DESCRIPTION_BASE_PRIORITY = 1.2
     MOOD_BASE_PRIORITY = 1.0
