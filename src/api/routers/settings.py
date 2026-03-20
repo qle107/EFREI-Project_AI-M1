@@ -35,7 +35,7 @@ def _runtime_to_settings_out(runtime: dict, cache_size: int) -> LLMSettingsOut:
         anthropic_model=runtime.get("anthropic_model", "claude-3-5-haiku-20241022"),
         anthropic_max_tokens=runtime.get("anthropic_max_tokens", 512),
         anthropic_configured=get_anthropic_configured(),
-        gemini_model=runtime.get("gemini_model", "gemini-1.5-flash"),
+        gemini_model=runtime.get("gemini_model", "gemini-2.0-flash"),
         gemini_max_tokens=runtime.get("gemini_max_tokens", 512),
         gemini_configured=get_gemini_configured(),
     )

@@ -71,6 +71,12 @@ def _build_llm_error_message(provider: str, err: Exception) -> str:
     if "api key is not set" in err_lower:
         return err_text
 
+    # Surface Gemini / Claude HTTP and structured errors (not raw opaque blobs).
+    if "gemini api error" in err_lower:
+        return err_text
+    if err_lower.startswith("gemini returned no text"):
+        return err_text
+
     # Keep actionable Ollama connectivity/model errors.
     if provider == "ollama" and (
         "connection refused" in err_lower

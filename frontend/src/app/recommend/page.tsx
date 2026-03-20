@@ -1281,6 +1281,23 @@ export default function RecommendPage() {
               >
                 Claude
               </motion.button>
+              <motion.button
+                type="button"
+                onClick={() => handleLlmProviderChange("gemini")}
+                disabled={llmProviderSwitching || !geminiConfigured}
+                whileHover={geminiConfigured ? { scale: 1.02 } : {}}
+                whileTap={geminiConfigured ? { scale: 0.98 } : {}}
+                title={!geminiConfigured ? "Set GEMINI_API_KEY in backend .env or in Settings" : undefined}
+                className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                  llmProvider === "gemini"
+                    ? "bg-violet-600 text-white"
+                    : !geminiConfigured
+                      ? "text-gray-600 cursor-not-allowed"
+                      : "text-gray-400 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                Gemini
+              </motion.button>
             </div>
             {(!anthropicConfigured || !geminiConfigured) && (
               <p className="text-[10px] text-gray-600 max-w-sm">

@@ -22,7 +22,7 @@ _DEFAULTS = {
     "cache_max_size": int(os.getenv("LLM_CACHE_MAX_SIZE", "200")),
     "anthropic_model": os.getenv("ANTHROPIC_MODEL", "claude-3-5-haiku-20241022"),
     "anthropic_max_tokens": int(os.getenv("ANTHROPIC_MAX_TOKENS", "512")),
-    "gemini_model": os.getenv("GEMINI_MODEL", "gemini-1.5-flash"),
+    "gemini_model": os.getenv("GEMINI_MODEL", "gemini-2.0-flash"),
     "gemini_max_tokens": int(os.getenv("GEMINI_MAX_TOKENS", "512")),
 }
 

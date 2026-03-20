@@ -593,7 +593,7 @@ export default function HowItWorksPage() {
                   <p className="text-xs font-semibold text-white">Google Gemini</p>
                 </div>
                 <div className="space-y-1.5 text-xs">
-                  <div className="flex gap-2"><span className="font-mono text-gray-600 w-20 shrink-0">Model</span><span className="text-gray-300">gemini-1.5-flash</span></div>
+                  <div className="flex gap-2"><span className="font-mono text-gray-600 w-20 shrink-0">Model</span><span className="text-gray-300">gemini-2.0-flash</span></div>
                   <div className="flex gap-2"><span className="font-mono text-gray-600 w-20 shrink-0">Endpoint</span><span className="text-gray-300 font-mono text-[10px]">generativelanguage.googleapis.com</span></div>
                   <div className="flex gap-2"><span className="font-mono text-gray-600 w-20 shrink-0">Max tokens</span><span className="text-gray-300">512</span></div>
                   <div className="flex gap-2"><span className="font-mono text-gray-600 w-20 shrink-0">Key</span><span className="text-amber-300">.env or Settings</span></div>

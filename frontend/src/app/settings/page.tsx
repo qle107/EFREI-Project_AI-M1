@@ -29,7 +29,7 @@ const FIELD_HELP: Record<string, string> = {
   gemini_api_key:
     "Optional: paste your Gemini API key here to use instead of .env. Stored in memory only; leave blank to use GEMINI_API_KEY from .env.",
   gemini_model:
-    "Gemini model ID (e.g. gemini-1.5-flash, gemini-1.5-pro). See Google AI Studio for available models.",
+    "Gemini model ID (e.g. gemini-2.0-flash). See Google AI Studio for currently available models.",
   gemini_max_tokens:
     "Maximum tokens for Gemini responses. Higher values allow longer explanations.",
   num_predict:
@@ -329,7 +329,7 @@ export default function SettingsPage() {
               value={form.gemini_model ?? ""}
               onChange={(v) => setForm((f) => ({ ...f, gemini_model: v }))}
               type="text"
-              placeholder="gemini-1.5-flash"
+              placeholder="gemini-2.0-flash"
             />
             <SettingRow
               label="Gemini max tokens"

@@ -125,3 +125,27 @@ Create a `.env` or set in the shell:
 - `SECRET_KEY` ? JWT signing key (required in production).
 - `DEMO_USERNAME` / `DEMO_PASSWORD_HASH` ? override default user (hash with bcrypt).
 - **LLM**: `LLM_PROVIDER` = `ollama` (default), `anthropic`, or `gemini`. For Ollama: `LLM_URL` / `LLM_MODEL` (default: `http://localhost:11434/api/generate`, `phi3:mini`). For Claude: `ANTHROPIC_API_KEY`. For Gemini: `GEMINI_API_KEY`. You can switch between the three in the app (Settings or Recommend page).
+
+### Docker
+
+**API image only** (from repo root):
+
+```bash
+docker build -t cinewatch-api .
+docker run --rm -p 8000:8000 -v "%cd%\data:/app/data" cinewatch-api
+```
+
+On PowerShell, use `${PWD}/data` instead of `%cd%\data`. Mount `./data` so `data/processed/movies_referential.csv` (and optional `data/raw/Database_Cleaned.csv` for posters) are visible inside the container. Embedding files under `models/embeddings/` are copied into the image at build time; ensure `desc_embeddings.npy` exists there (run your embedding pipeline locally if needed).
+
+**API + Next.js frontend** with Compose:
+
+```bash
+docker compose up --build
+```
+
+- API: [http://localhost:8000/docs](http://localhost:8000/docs)  
+- Frontend: [http://localhost:3000](http://localhost:3000)  
+
+Compose sets `LLM_URL` to `http://host.docker.internal:11434/api/generate` so Ollama on the host is reachable from the API container (Docker Desktop on Windows/Mac). On Linux, add `extra_hosts: ["host.docker.internal:host-gateway"]` under `api` or point `LLM_URL` at your Ollama service.
+
+Override the browser-facing API URL for the frontend build with `NEXT_PUBLIC_API_URL` (e.g. if you publish behind another host or port).
