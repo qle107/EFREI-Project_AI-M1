@@ -6,13 +6,13 @@ from src.core.config import EMBEDDINGS_DIR, PROCESSED_DIR
 
 
 class CoverageScorer:
-    RECENCY_WEIGHT = 0.05
-    SEMANTIC_WEIGHT_BUDGET = 0.95
-    DESCRIPTION_BASE_PRIORITY = 2.4
-    MOOD_BASE_PRIORITY = 0.5
-    THEME_BASE_PRIORITY = 0.5
-    STYLE_BASE_PRIORITY = 0.4
-    SLIDER_STEP = 0.2
+    RECENCY_WEIGHT = 0.1
+    SEMANTIC_WEIGHT_BUDGET = 0.9
+    DESCRIPTION_BASE_PRIORITY = 1.2
+    MOOD_BASE_PRIORITY = 1.0
+    THEME_BASE_PRIORITY = 1.0
+    STYLE_BASE_PRIORITY = 0.8
+    SLIDER_STEP = 0.3
 
     def __init__(self):
         # Load movie embeddings from Step 2
